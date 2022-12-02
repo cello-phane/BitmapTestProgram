@@ -157,12 +157,13 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         ClearScreen(0x333333);
         
         //Examples:
-        //A perfect square is drawn if y1-x1 = y2-x2 ?
+
         //From parameters - (x1,y1,x2,y2) below
-        FillSquare(440,140,880,580, 0x5D3754);
-        OutlineSquare(440,140,880,580, 0xAADB1E);
-        VertexPointSquare(440,140,880,580, 0xFFFFFF);
-        BisectSqr(440,140,880,580, 0xAADB1E);
+        //a perfect square is drawn if y1-x1 = y1-x1 && y1 = x1 x 2
+        FillSquare       (468,132,936,600, 0x5D3754);
+        OutlineSquare    (468,132,936,600, 0xAADB1E);
+        VertexPointSquare(468,132,936,600, 0xFFFFFF);
+        BisectSqr        (468,132,936,600, 0xAADB1E);
         
         //Centered coordinates
         //Need a new way to approach the window's coordinates x and y(It's ambiguous when reading the x and y) 
