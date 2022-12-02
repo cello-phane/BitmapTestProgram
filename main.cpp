@@ -21,7 +21,7 @@ void DrawPixel(int X, int Y, u32 Color) {
     *Pixel = Color;
 }
 
-//The functions below use these coordinate xy
+//The functions below use these coordinates xy
 /* xy------       <--- tleft_x, tleft_y
    |      |
    |      |
@@ -32,14 +32,15 @@ void DrawPixel(int X, int Y, u32 Color) {
 // Coordinates passed are the top left xy and bot right xy
 //OutlineSquare(120,220,220,320, 0xFFFFFF);
 void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-    for(auto x = bright_x - tleft_x;x < bright_x;x++){
-      DrawPixel(x, bright_y, Color);//Horiz bottom
-      DrawPixel(x, tleft_y, Color); //Horiz top
-    }
-    for(auto x_left = bright_x - tleft_x, y = tleft_y; y < bright_y + 1;y++){
-      DrawPixel(x_left, y, Color); //Vert left
-      DrawPixel(bright_x, y, Color);//Vert right
-    }
+  //Draw Horiz Parallel lines and  Vert Parallel lines
+  for(auto x = bright_x - tleft_x;x < bright_x;x++){
+    DrawPixel(x, bright_y, Color);//Horiz bottom
+    DrawPixel(x, tleft_y, Color); //Horiz top
+  }
+  for(auto x_left = bright_x - tleft_x, y = tleft_y; y < bright_y + 1;y++){
+    DrawPixel(x_left, y, Color); //Vert left
+    DrawPixel(bright_x, y, Color);//Vert right
+  }
 }
 
 //Draws pixel points on each corner(vertex)
@@ -53,10 +54,11 @@ void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32
 }
 //Fills the area inside the coordinates
 //FillSquare(122,222,218,318, 0x00FF33); //Example of function call
-void FillSquare(int from_x, int from_y, int to_x, int to_y, u32 Color){
-  for(auto i=from_x-20; i<to_x+1;i++){
-    for(auto j=from_y; j<to_y+1;j++){
-      DrawPixel(i, j, Color);
+void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
+  //Draw Horiz Parallel lines and  Vert Parallel lines
+  for(auto x = bright_x - tleft_x;x < bright_x;x++){
+    for(auto i=0,f = bright_y - tleft_y;i <= f;i++){
+      DrawPixel(x, tleft_y+i, Color); //Horiz
     }
   }
 }
@@ -149,10 +151,15 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
 
         ClearScreen(0x333333);
-
-        FillSquare(122,222,218,318, 0x00FF33);
-        OutlineSquare(120,220,220,320, 0xFFFFFF);
-
+        
+        //Examples of drawing functions here
+        //Fill the sqr with a purple color
+        FillSquare(220,220,320,620, 0x5D3754);
+        //Outline the sqr with a green color
+        OutlineSquare(220,220,320,620, 0xAADB1E);
+        //Draw white dot for each corner pixel
+        VertexPointSquare(220,220,320,620, 0xFFFFFF);
+        
         StretchDIBits(DeviceContext,
                       0, 0,
                       BitmapWidth, BitmapHeight,
