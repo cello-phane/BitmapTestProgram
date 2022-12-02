@@ -28,11 +28,9 @@ void DrawPixel(int X, int Y, u32 Color) {
    |______xy      <--- bright_x, bright_y
  */
 
-//Draws the lines parallel and perpendicular from top-left corner and bot-right corner points
-// Coordinates passed are the top left xy and bot right xy
-//OutlineSquare(120,220,220,320, 0xFFFFFF);
+//Draws the lines parallel/perpendicular from top-left corner and bot-right corner points
 void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-  //Draw Horiz Parallel lines and  Vert Parallel lines
+  //Draw Horiz Parallel lines and Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
     DrawPixel(x, bright_y, Color);//Horiz bottom
     DrawPixel(x, tleft_y, Color); //Horiz top
@@ -44,22 +42,28 @@ void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Col
 }
 
 //Draws pixel points on each corner(vertex)
-// Coordinates passed are the top left xy and bot right xy
-//VertexPointSquare(120,220,220,320, 0x00FF33); //Example of functin call
 void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
   DrawPixel(bright_x - tleft_x, tleft_y, Color); //top left point
   DrawPixel(bright_x, tleft_y, Color);           //top right point
   DrawPixel(bright_x - tleft_x, bright_y, Color);//bot left point
   DrawPixel(bright_x, bright_y, Color);          //bot right point
 }
-//Fills the area inside the coordinates
-//FillSquare(122,222,218,318, 0x00FF33); //Example of function call
+
+//Fills the area inside area = x1,y1 right--> x1+(distance from x2-x1), and down--> y1+(distance from y2-y1) 
 void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
-    for(auto i=0,f = bright_y - tleft_y;i <= f;i++){
-      DrawPixel(x, tleft_y+i, Color); //Horiz
+    for(auto y = tleft_y;y <= bright_y;y++){
+      DrawPixel(x, y, Color); //Horiz - multiple lines are drawn down the y-axis
     }
+  }
+}
+//Bisecting with a diagonal line, which forms 2 triangles if square is drawn beforehand
+void BisectSqr(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
+  //Draw a Diagonal line passing through the center of square/rectangle and
+  //the difference of the x and y of the square determines congruence of the triangles
+  for(auto down=tleft_x,diag=tleft_y;down<=bright_x && diag<=bright_y;down++,diag++){
+    DrawPixel(down, diag, Color);
   }
 }
 
@@ -152,13 +156,14 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
         ClearScreen(0x333333);
         
-        //Examples of drawing functions here
-        //Fill the sqr with a purple color
-        FillSquare(340,220,850,550, 0x5D3754);
-        //Outline the sqr with a green color
-        OutlineSquare(340,220,850,550, 0xAADB1E);
-        //Draw white dot for each corner pixel
-        VertexPointSquare(340,220,850,550, 0xFFFFFF);
+        //Examples:
+        //A perfect square is drawn if y1-x1 = y2-x2 ?
+        //From parameters - (x1,y1,x2,y2) below
+        FillSquare(440,140,880,580, 0x5D3754);
+        OutlineSquare(440,140,880,580, 0xAADB1E);
+        VertexPointSquare(440,140,880,580, 0xFFFFFF);
+        BisectSqr(440,140,880,580, 0xAADB1E);
+        
         //Centered coordinates
         //Need a new way to approach the window's coordinates x and y(It's ambiguous when reading the x and y) 
         //Mostly because of the negative bitmap value to start the 0,0 at the top left, instead of bottom left
