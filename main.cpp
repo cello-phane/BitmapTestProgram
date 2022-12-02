@@ -32,13 +32,14 @@ void DrawPixel(int X, int Y, u32 Color) {
 // Coordinates passed are the top left xy and bot right xy
 //OutlineSquare(120,220,220,320, 0xFFFFFF);
 void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-for(auto x = bright_x - tleft_x;x < bright_x;x++){
-  DrawPixel(x, bright_y, Color);//Horiz bottom
-  DrawPixel(x, tleft_y, Color); //Horiz top
-}
-for(auto x_left = bright_x - tleft_x, y = tleft_y; y < bright_y + 1;y++){
-  DrawPixel(x_left, y, Color); //Vert left
-  DrawPixel(bright_x, y, Color);//Vert right
+    for(auto x = bright_x - tleft_x;x < bright_x;x++){
+      DrawPixel(x, bright_y, Color);//Horiz bottom
+      DrawPixel(x, tleft_y, Color); //Horiz top
+    }
+    for(auto x_left = bright_x - tleft_x, y = tleft_y; y < bright_y + 1;y++){
+      DrawPixel(x_left, y, Color); //Vert left
+      DrawPixel(bright_x, y, Color);//Vert right
+    }
 }
 
 //Draws pixel points on each corner(vertex)
