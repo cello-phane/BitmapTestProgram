@@ -154,11 +154,14 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         
         //Examples of drawing functions here
         //Fill the sqr with a purple color
-        FillSquare(220,220,320,620, 0x5D3754);
+        FillSquare(340,220,850,550, 0x5D3754);
         //Outline the sqr with a green color
-        OutlineSquare(220,220,320,620, 0xAADB1E);
+        OutlineSquare(340,220,850,550, 0xAADB1E);
         //Draw white dot for each corner pixel
-        VertexPointSquare(220,220,320,620, 0xFFFFFF);
+        VertexPointSquare(340,220,850,550, 0xFFFFFF);
+        //Centered coordinates
+        //Need a new way to approach the window's coordinates x and y(It's ambiguous when reading the x and y) 
+        //Mostly because of the negative bitmap value to start the 0,0 at the top left, instead of bottom left
         
         StretchDIBits(DeviceContext,
                       0, 0,
