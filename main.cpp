@@ -3,6 +3,8 @@
 #include <windows.h>
 // #include <wingdi.h>//Don't include this directly, since windows.h implicitly includes that header
 #include <stdint.h>
+#include <string>
+//#include <algorithm>
 
 typedef uint32_t u32;
 
@@ -14,6 +16,19 @@ int BitmapHeight;
 int ClientWidth;
 int ClientHeight;
 
+template<typename T>
+//Vector for the x,y,and z coordinates (Not to be confused with vector datatype in C++ of course..)
+//The type of vec can be float,int, or double
+class Vec3
+{
+public:
+  // 3 most basic ways of initializing a vector
+  Vec3() : x(T(0)), y(T(0)), z(T(0)) {}
+  Vec3(const T &xx) : x(xx), y(xx), z(xx) {}
+  Vec3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {}
+  T x, y, z;
+};
+
 // Draws a pixel at X, Y (from top left corner)
 void DrawPixel(int X, int Y, u32 Color) {
     u32 *Pixel = (u32 *)BitmapMemory;
@@ -21,63 +36,61 @@ void DrawPixel(int X, int Y, u32 Color) {
     *Pixel = Color;
 }
 
-//The functions below use these coordinate xy
-/* xy------       <--- tleft_x, tleft_y
+//The functions for squares and lines below use these coordinate xy
+/* xy------       <--- xa, ya
    |      |
    |      |
-   |______xy      <--- bright_x, bright_y
+   |______xy      <--- xb, yb
  */
 
 //Draws the lines parallel and perpendicular from top-left corner and bot-right corner points
 // Coordinates passed are the top left xy and bot right xy
-void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-  //Draw Horiz Parallel lines and  Vert Parallel lines
-  for(auto x = bright_x - tleft_x;x < bright_x;x++){
-    DrawPixel(x, bright_y, Color);//Horiz bottom
-    DrawPixel(x, tleft_y, Color); //Horiz top
-  }
-  for(auto x_left = bright_x - tleft_x, y = tleft_y; y < bright_y + 1;y++){
-    DrawPixel(x_left, y, Color); //Vert left
-    DrawPixel(bright_x, y, Color);//Vert right
+void OutlineSquare(int xa, int ya, int xb, int yb, u32 Color){
+  for(auto x = xb - xa;x < xb;x++){
+    DrawPixel(x, yb, Color); //Horiz bottom
+    DrawPixel(x, ya, Color); //Horiz top
+  }//Points should make parallel lines
+  for(auto dx = xb - xa, y = ya; y < yb + 1;y++){
+    DrawPixel(dx, y, Color); //Vert left
+    DrawPixel(xb, y, Color); //Vert right
   }
 }
 
-//Draws pixel points on each corner(vertex)
-// Coordinates passed are the top left xy and bot right xy
-void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-  DrawPixel(bright_x - tleft_x, tleft_y, Color); //top left point
-  DrawPixel(bright_x, tleft_y, Color);           //top right point
-  DrawPixel(bright_x - tleft_x, bright_y, Color);//bot left point
-  DrawPixel(bright_x, bright_y, Color);          //bot right point
+//Draws pixel points on each corner point(vertex)
+void VertexPointSquare(int xa, int ya, int xb, int yb, u32 Color){
+  DrawPixel(xb - xa, ya, Color);      //top left point
+  DrawPixel(xb, ya, Color);           //top right point
+  DrawPixel(xb - xa, yb, Color);      //bot left point
+  DrawPixel(xb, yb, Color);           //bot right point
 }
 //Fills the area inside the coordinates
-void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
+void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
   //Draw Horiz Parallel lines and  Vert Parallel lines
-  for(auto x = bright_x - tleft_x;x < bright_x;x++){
-    for(auto y = tleft_y;y <= bright_y;y++){
+  for(auto x = xb - xa;x < xb;x++){
+    for(auto y = ya;y <= yb;y++){
       DrawPixel(x, y, Color); //Horiz
     }
   }
 }
-//xa, ya == TOP coords and xb, yb == BASE/BOT coords
-void DiagonalLine(int xa, int ya, int xb, int yb, u32 Color, const char& dir){
-  if(dir == 'F'){
+void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& dir){
+  if(dir == "front"){
     for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
-  if(dir == 'B'){
+  if(dir == "back"){
     for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
 }
-void OutlineTri(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hflip){
+//xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
+void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hflip){
   if (hflip==false) {
-    DiagonalLine(xa, ya, xb, yb, Color, 'F');
+    DiagnolLine(xa, ya, xb, yb, Color, "front");
   }
   else {
-    DiagonalLine(xa, ya, xb, yb, Color, 'B');
+    DiagnolLine(xa, ya, xb, yb, Color, "back");
   }
   if(hflip==false){
     for(auto dx=xb-xa, dy=ya;dx < xb && dy < yb+1;dy++,dx++){
@@ -183,6 +196,10 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     bool Running = true;
 
+    //Initialize a vector `a`
+    typedef Vec3<int> Vec3int;
+    Vec3int a;
+
     while(Running) {
         MSG Message;
         while(PeekMessage(&Message, nullptr, 0, 0, PM_REMOVE)) {
@@ -190,42 +207,36 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
             TranslateMessage(&Message);
             DispatchMessage(&Message);
         }
-
         ClearScreen(0x333333);
-        //a perfect square is drawn if x2-x1 = y2-y1 and y2 = 2(y1), x2 = 2(x1)
-        // FillSquare       (468,132,936,600, 0x5D3754);
+        //a perfect square is drawn if y2-y1 = x2 - x1 && y1=2 * x1
+        //FillSquare(468,132,936,600, 0x5D3754);
         // OutlineSquare    (468,132,936,600, 0xAADB1E);
         // VertexPointSquare(468,132,936,600, 0xFFFFFF);
-        // DiagonalLine         (468, 132, 936, 600, 0xAADB1E, 'F');
-        // DiagonalLine         (936, 132, 468, 600, 0xAADB1E, 'B');
-
+        // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "front");
+        // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "back");
         /* xa,ya__
             \    |
-             \   |
-              \  |
+             \   |  */   OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false);
+        /*    \  |
               xb,yb */
-        // OutlineTri         (468,132,936,600, 0xAADB1E, true, false);
 
         /* xa,ya
            | \
-           |  \
-           |   \
-           |____xb,yb   */
-        // OutlineTri         (468,132,936,600, 0xAADB1E, false, false);
+           |  \     */   OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, false);
+        /* |   \
+           |___xb,yb */
 
         /*    xa,ya
                / |
-              /  |
-             /   |
-          xb,yb__|      */
-        // OutlineTri         (468,132,936,600, 0xAADB1E, false, true);
+              /  | */    OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true);
+        /*   /   |
+          xb,yb__| */
 
         /*   __xa,ya
              |    /
-             |   /
-             |  /
-             xb,yb          */
-        // OutlineTri         (468,132,936,600, 0xAADB1E, true, true);
+             |   / */    OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);
+        /*   |  /
+             xb,yb */
 
         StretchDIBits(DeviceContext,
                       0, 0,
