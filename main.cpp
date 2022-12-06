@@ -67,7 +67,7 @@ void DiagonalLine(int xa, int ya, int xb, int yb, u32 Color, const char& dir){
     }
   }
   if(dir == 'B'){
-    for(auto dx=xa,dy=ya;dx>=xb && dy<=yb;dx--,dy++){
+    for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
@@ -92,13 +92,13 @@ void OutlineTri(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hfli
     }
   }
   else{
-    for(auto dx=xa-xb,dy=ya;dy < yb+1;dx++,dy++){
+    for(auto dx=xb-xa,dy=ya;dy < yb+1;dx++,dy++){
       if(vflip == false){
         DrawPixel(dx, yb, Color);//Horiz bot
-        DrawPixel(xa, dy, Color);//Vert right
+        DrawPixel(xb, dy, Color);//Vert right
       }
       else{
-        DrawPixel(xb, dy, Color);//Vert left
+        DrawPixel(xa, dy, Color);//Vert left
         DrawPixel(dx, ya, Color);//Horiz top
       }
     }
@@ -218,14 +218,14 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
               /  |
              /   |
           xb,yb__|      */
-        // OutlineTri         (936,132,468,600, 0xAADB1E, false, true);
+        // OutlineTri         (468,132,936,600, 0xAADB1E, false, true);
 
         /*   __xa,ya
              |    /
              |   /
              |  /
              xb,yb          */
-        // OutlineTri         (936,132,468,600, 0xAADB1E, true, true);
+        // OutlineTri         (468,132,936,600, 0xAADB1E, true, true);
 
         StretchDIBits(DeviceContext,
                       0, 0,
