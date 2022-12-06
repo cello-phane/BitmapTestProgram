@@ -1,7 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define UNICODE
 #include <windows.h>
-// #include <wingdi.h>
+// #include <wingdi.h>//Don't include this directly, since windows.h implicitly includes that header
 #include <stdint.h>
 
 typedef uint32_t u32;
@@ -21,16 +21,18 @@ void DrawPixel(int X, int Y, u32 Color) {
     *Pixel = Color;
 }
 
-//The functions below use these coordinates xy
+//The functions below use these coordinate xy
 /* xy------       <--- tleft_x, tleft_y
    |      |
    |      |
    |______xy      <--- bright_x, bright_y
  */
 
-//Draws the lines parallel/perpendicular from top-left corner and bot-right corner points
+//Draws the lines parallel and perpendicular from top-left corner and bot-right corner points
+// Coordinates passed are the top left xy and bot right xy
+//OutlineSquare(1200,2200,2200,3200, 0xFFFFFF);
 void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-  //Draw Horiz Parallel lines and Vert Parallel lines
+  //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
     DrawPixel(x, bright_y, Color);//Horiz bottom
     DrawPixel(x, tleft_y, Color); //Horiz top
@@ -42,31 +44,71 @@ void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Col
 }
 
 //Draws pixel points on each corner(vertex)
-void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
+// Coordinates passed are the top left xy and bot right xy
+void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int
+bright_y, u32 Color){
   DrawPixel(bright_x - tleft_x, tleft_y, Color); //top left point
   DrawPixel(bright_x, tleft_y, Color);           //top right point
   DrawPixel(bright_x - tleft_x, bright_y, Color);//bot left point
   DrawPixel(bright_x, bright_y, Color);          //bot right point
 }
-
-//Fills the area inside area = x1,y1 right--> x1+(distance from x2-x1), and down--> y1+(distance from y2-y1) 
-void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
+//Fills the area inside the coordinates
+//FillSquare(122,222,218,318, 0x00FF33); //Example of function call
+void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y,
+u32 Color){
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
     for(auto y = tleft_y;y <= bright_y;y++){
-      DrawPixel(x, y, Color); //Horiz - multiple lines are drawn down the y-axis
+      DrawPixel(x, y, Color); //Horiz
     }
   }
 }
-//Bisecting with a diagonal line, which forms 2 triangles if square is drawn beforehand
-void BisectSqr(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
-  //Draw a Diagonal line passing through the center of square/rectangle and
-  //the difference of the x and y of the square determines congruence of the triangles
-  for(auto down=tleft_x,diag=tleft_y;down<=bright_x && diag<=bright_y;down++,diag++){
-    DrawPixel(down, diag, Color);
+//xa, ya == TOP coords and xb, yb == BASE/BOT coords
+void DiagnolLine(int xa, int ya, int xb, int yb,
+                 u32 Color, const char& dir){
+  if(dir == 'F'){
+    for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
+      DrawPixel(dx, dy, Color);
+    }
+  }
+  if(dir == 'B'){
+    for(auto dx=xa,dy=ya;dx>=xb && dy<=yb;dx--,dy++){
+      DrawPixel(dx, dy, Color);
+    }
   }
 }
-
+void OutlineTri(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hflip){
+  if (hflip==false) {
+    DiagnolLine(xa, ya, xb, yb, Color, 'F');
+  }
+  else {
+    DiagnolLine(xa, ya, xb, yb, Color, 'B');
+  }
+  if(hflip==false){
+    for(auto dx=xb-xa, dy=ya;dx < xb && dy < yb+1;dy++,dx++){
+      if(vflip == false){
+        DrawPixel(dx, yb, Color);//Horiz bot
+        DrawPixel(xa, dy, Color);//Vert left
+      }
+      else{
+        DrawPixel(xb, dy, Color);//Vert right
+        DrawPixel(dx, ya, Color);//Horiz top
+      }
+    }
+  }
+  else{
+    for(auto dx=xa-xb,dy=ya;dy < yb+1;dx++,dy++){
+      if(vflip == false){
+        DrawPixel(dx, yb, Color);//Horiz bot
+        DrawPixel(xa, dy, Color);//Vert right
+      }
+      else{
+        DrawPixel(xb, dy, Color);//Vert left
+        DrawPixel(dx, ya, Color);//Horiz top
+      }
+    }
+  }
+}
 void ClearScreen(u32 Color) {
     u32 *Pixel = (u32 *)BitmapMemory;
     for(int Index = 0;
@@ -115,8 +157,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
-    ClientWidth = ClientRect.right - ClientRect.left;
-    ClientHeight = ClientRect.bottom - ClientRect.top;
+    ClientWidth = ClientRect.right - ClientRect.left + 600;
+    ClientHeight = ClientRect.bottom - ClientRect.top + 350;
 
     BitmapWidth = ClientWidth;
     BitmapHeight = ClientHeight;
@@ -155,20 +197,41 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
 
         ClearScreen(0x333333);
-        
-        //Examples:
+        //a perfect square is drawn if y1-x1 = y1-x1 && y1=2 * x1
+        // FillSquare       (468,132,936,600, 0x5D3754);
+        // OutlineSquare    (468,132,936,600, 0xAADB1E);
+        // VertexPointSquare(468,132,936,600, 0xFFFFFF);
+        // DiagnolLine         (468, 132, 936, 600, 0xAADB1E, 'F');
+        // DiagnolLine         (936, 132, 468, 600, 0xAADB1E, 'B');
 
-        //From parameters - (x1,y1,x2,y2) below
-        //a perfect square is drawn if y1-x1 = y1-x1 && y1 = x1 x 2
-        FillSquare       (468,132,936,600, 0x5D3754);
-        OutlineSquare    (468,132,936,600, 0xAADB1E);
-        VertexPointSquare(468,132,936,600, 0xFFFFFF);
-        BisectSqr        (468,132,936,600, 0xAADB1E);
-        
-        //Centered coordinates
-        //Need a new way to approach the window's coordinates x and y(It's ambiguous when reading the x and y) 
-        //Mostly because of the negative bitmap value to start the 0,0 at the top left, instead of bottom left
-        
+        /* xa,ya__
+            \    |
+             \   |
+              \  |
+              xb,yb */
+        // OutlineTri         (468,132,936,600, 0xAADB1E, true, false);
+
+        /* xa,ya
+           | \
+           |  \
+           |   \
+           |____xb,yb   */
+        // OutlineTri         (468,132,936,600, 0xAADB1E, false, false);
+
+        /*    xa,ya
+               / |
+              /  |
+             /   |
+          xb,yb__|      */
+        // OutlineTri         (936,132,468,600, 0xAADB1E, false, true);
+
+        /*   __xa,ya
+             |    /
+             |   /
+             |  /
+             xb,yb          */
+        // OutlineTri         (936,132,468,600, 0xAADB1E, true, true);
+
         StretchDIBits(DeviceContext,
                       0, 0,
                       BitmapWidth, BitmapHeight,
