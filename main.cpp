@@ -30,7 +30,6 @@ void DrawPixel(int X, int Y, u32 Color) {
 
 //Draws the lines parallel and perpendicular from top-left corner and bot-right corner points
 // Coordinates passed are the top left xy and bot right xy
-//OutlineSquare(1200,2200,2200,3200, 0xFFFFFF);
 void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
@@ -45,17 +44,14 @@ void OutlineSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Col
 
 //Draws pixel points on each corner(vertex)
 // Coordinates passed are the top left xy and bot right xy
-void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int
-bright_y, u32 Color){
+void VertexPointSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
   DrawPixel(bright_x - tleft_x, tleft_y, Color); //top left point
   DrawPixel(bright_x, tleft_y, Color);           //top right point
   DrawPixel(bright_x - tleft_x, bright_y, Color);//bot left point
   DrawPixel(bright_x, bright_y, Color);          //bot right point
 }
 //Fills the area inside the coordinates
-//FillSquare(122,222,218,318, 0x00FF33); //Example of function call
-void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y,
-u32 Color){
+void FillSquare(int tleft_x, int tleft_y, int bright_x, int bright_y, u32 Color){
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = bright_x - tleft_x;x < bright_x;x++){
     for(auto y = tleft_y;y <= bright_y;y++){
@@ -64,8 +60,7 @@ u32 Color){
   }
 }
 //xa, ya == TOP coords and xb, yb == BASE/BOT coords
-void DiagonalLine(int xa, int ya, int xb, int yb,
-                 u32 Color, const char& dir){
+void DiagonalLine(int xa, int ya, int xb, int yb, u32 Color, const char& dir){
   if(dir == 'F'){
     for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
       DrawPixel(dx, dy, Color);
@@ -197,7 +192,7 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
 
         ClearScreen(0x333333);
-        //a perfect square is drawn if y1-x1 = y1-x1 && y1=2 * x1
+        //a perfect square is drawn if x2-x1 = y2-y1 and y2 = 2(y1), x2 = 2(x1)
         // FillSquare       (468,132,936,600, 0x5D3754);
         // OutlineSquare    (468,132,936,600, 0xAADB1E);
         // VertexPointSquare(468,132,936,600, 0xFFFFFF);
