@@ -64,7 +64,7 @@ u32 Color){
   }
 }
 //xa, ya == TOP coords and xb, yb == BASE/BOT coords
-void DiagnolLine(int xa, int ya, int xb, int yb,
+void DiagonalLine(int xa, int ya, int xb, int yb,
                  u32 Color, const char& dir){
   if(dir == 'F'){
     for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
@@ -79,10 +79,10 @@ void DiagnolLine(int xa, int ya, int xb, int yb,
 }
 void OutlineTri(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hflip){
   if (hflip==false) {
-    DiagnolLine(xa, ya, xb, yb, Color, 'F');
+    DiagonalLine(xa, ya, xb, yb, Color, 'F');
   }
   else {
-    DiagnolLine(xa, ya, xb, yb, Color, 'B');
+    DiagonalLine(xa, ya, xb, yb, Color, 'B');
   }
   if(hflip==false){
     for(auto dx=xb-xa, dy=ya;dx < xb && dy < yb+1;dy++,dx++){
@@ -201,8 +201,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         // FillSquare       (468,132,936,600, 0x5D3754);
         // OutlineSquare    (468,132,936,600, 0xAADB1E);
         // VertexPointSquare(468,132,936,600, 0xFFFFFF);
-        // DiagnolLine         (468, 132, 936, 600, 0xAADB1E, 'F');
-        // DiagnolLine         (936, 132, 468, 600, 0xAADB1E, 'B');
+        // DiagonalLine         (468, 132, 936, 600, 0xAADB1E, 'F');
+        // DiagonalLine         (936, 132, 468, 600, 0xAADB1E, 'B');
 
         /* xa,ya__
             \    |
