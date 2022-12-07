@@ -4,7 +4,7 @@
 // #include <wingdi.h>//Don't include this directly, since windows.h implicitly includes that header
 #include <stdint.h>
 #include <string>
-//#include <algorithm>
+#include <algorithm>
 
 typedef uint32_t u32;
 
@@ -17,7 +17,7 @@ int ClientWidth;
 int ClientHeight;
 
 template<typename T>
-//Vector for the x,y,and z coordinates (Not to be confused with vector datatype in C++ of course..)
+//Vector for the x,y,and (and possibly z coords (not a vec datatype from C++ of course..)
 //The type of vec can be float,int, or double
 class Vec3
 {
@@ -73,24 +73,26 @@ void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
   }
 }
 void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& dir){
-  if(dir == "front"){
+  if(dir == "forward"){
+    // like a forwardslash
     for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
   if(dir == "back"){
+    // like a backslash
     for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
 }
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
-void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip, bool hflip){
+void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=false, bool hflip=false){
   if (hflip==false) {
-    DiagnolLine(xa, ya, xb, yb, Color, "front");
+    DiagnolLine(xa, ya, xb, yb, Color, "forward");/*forward would make 90 degree angle at the left of the base |\ */
   }
   else {
-    DiagnolLine(xa, ya, xb, yb, Color, "back");
+    DiagnolLine(xa, ya, xb, yb, Color, "back");/*back would make 90 degree angle at the right of the base /| */
   }
   if(hflip==false){
     for(auto dx=xb-xa, dy=ya;dx < xb && dy < yb+1;dy++,dx++){
@@ -154,15 +156,11 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
                                  CW_USEDEFAULT, CW_USEDEFAULT,
                                  CW_USEDEFAULT, CW_USEDEFAULT,
                                  0, 0, Instance, 0);
-
     if(!Window) {
         MessageBox(0, L"CreateWindowEx failed", 0, 0);
         return GetLastError();
     }
-
-
     // Get client area dimensions
-
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
     ClientWidth = ClientRect.right - ClientRect.left + 600;
@@ -209,22 +207,26 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         //a perfect square is drawn if y2-y1 = x2 - x1 && y1=2 * x1
-        //FillSquare(468,132,936,600, 0x5D3754);
+        FillSquare(468,132,936,600, 0x5D3754);
         // OutlineSquare    (468,132,936,600, 0xAADB1E);
         // VertexPointSquare(468,132,936,600, 0xFFFFFF);
         // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "front");
         // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "back");
+
+        //For the right triangle function:
+        //  The 2 bool parameters after Color are vflip, hflip
+        //  And the default false, false is a triangle with a right angle at the left side of the base
+        /* xa,ya
+           | \
+           |  \     */   OutlineRightTriangle(468,132,936,600, 0xAADB1E);//default is false false
+        /* |   \
+           |___xb,yb */
+
         /* xa,ya__
             \    |
              \   |  */   OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false);
         /*    \  |
               xb,yb */
-
-        /* xa,ya
-           | \
-           |  \     */   OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, false);
-        /* |   \
-           |___xb,yb */
 
         /*    xa,ya
                / |
