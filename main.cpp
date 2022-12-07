@@ -4,7 +4,6 @@
 // #include <wingdi.h>//Don't include this directly, since windows.h implicitly includes that header
 #include <stdint.h>
 #include <string>
-#include <algorithm>
 
 typedef uint32_t u32;
 
@@ -95,7 +94,7 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     DiagnolLine(xa, ya, xb, yb, Color, "back");/*back would make 90 degree angle at the right of the base /| */
   }
   if(hflip==false){
-    for(auto dx=xb-xa, dy=ya;dx < xb && dy < yb+1;dy++,dx++){
+    for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
       if(vflip == false){
         DrawPixel(dx, yb, Color);//Horiz bot
         DrawPixel(xa, dy, Color);//Vert left
@@ -107,15 +106,15 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     }
   }
   else{
-    for(auto dx=xb-xa,dy=ya;dy < yb+1;dx++,dy++){
+    for(auto dx=xa,dy=ya;dx < xb && dy < yb+1;dx++,dy++){
       if(vflip == false){
         DrawPixel(dx, yb, Color);//Horiz bot
         DrawPixel(xb, dy, Color);//Vert right
       }
       else{
-        DrawPixel(xa, dy, Color);//Vert left
-        DrawPixel(dx, ya, Color);//Horiz top
-      }
+		DrawPixel(xa, dy, Color);//Vert left
+		DrawPixel(dx, ya, Color);//Horiz top
+	  }
     }
   }
 }
@@ -208,10 +207,10 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         ClearScreen(0x333333);
         //a perfect square is drawn if y2-y1 = x2 - x1 && y1=2 * x1
         FillSquare(468,132,936,600, 0x5D3754);
-        // OutlineSquare    (468,132,936,600, 0xAADB1E);
-        // VertexPointSquare(468,132,936,600, 0xFFFFFF);
-        // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "front");
-        // DiagnolLine(468, 132, 936, 600, 0xAADB1E, "back");
+         OutlineSquare    (468,132,936,600, 0xAADB1E);
+         VertexPointSquare(468,132,936,600, 0xFFFFFF);
+         DiagnolLine(468, 132, 936, 600, 0xAADB1E, "front");
+         DiagnolLine(468, 132, 936, 600, 0xAADB1E, "back");
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
