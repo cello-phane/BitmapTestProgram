@@ -18,14 +18,14 @@ int ClientHeight;
 template<typename T>
 //Vector for the x,y,and (and possibly z coords (not a vec datatype from C++ of course..)
 //The type of vec can be float,int, or double
-class Vec3
+class Vec2
 {
 public:
   // 3 most basic ways of initializing a vector
-  Vec3() : x(T(0)), y(T(0)), z(T(0)) {}
-  Vec3(const T &xx) : x(xx), y(xx), z(xx) {}
-  Vec3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {}
-  T x, y, z;
+  Vec2() : x(T(0)), y(T(0)) {}
+  Vec2(const T &xx) : x(xx), y(xx) {}
+  Vec2(T xx, T yy) : x(xx), y(yy) {}
+  T x, y;
 };
 
 // Draws a pixel at X, Y (from top left corner)
@@ -44,7 +44,9 @@ void DrawPixel(int X, int Y, u32 Color) {
 
 //Draws the lines parallel and perpendicular from top-left corner and bot-right corner points
 // Coordinates passed are the top left xy and bot right xy
-void OutlineSquare(int xa, int ya, int xb, int yb, u32 Color){
+template<typename coordType>
+void OutlineSquare(Vec2<coordType> Vec_a, Vec2<coordType> Vec_b, u32 Color){
+  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
   for(auto x = xb - xa;x < xb;x++){
     DrawPixel(x, yb, Color); //Horiz bottom
     DrawPixel(x, ya, Color); //Horiz top
@@ -56,14 +58,18 @@ void OutlineSquare(int xa, int ya, int xb, int yb, u32 Color){
 }
 
 //Draws pixel points on each corner point(vertex)
-void VertexPointSquare(int xa, int ya, int xb, int yb, u32 Color){
+template<typename coordType>
+void VertexPointSquare(Vec2<coordType> Vec_a, Vec2<coordType> Vec_b, u32 Color){
+  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
   DrawPixel(xb - xa, ya, Color);      //top left point
   DrawPixel(xb, ya, Color);           //top right point
   DrawPixel(xb - xa, yb, Color);      //bot left point
   DrawPixel(xb, yb, Color);           //bot right point
 }
 //Fills the area inside the coordinates
-void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
+template<typename coordType>
+void FillSquare(Vec2<coordType> Vec_a, Vec2<coordType> Vec_b, u32 Color){
+  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = xb - xa;x < xb;x++){
     for(auto y = ya;y <= yb;y++){
@@ -71,7 +77,9 @@ void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
     }
   }
 }
-void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& dir){
+template<typename coordType>
+void DiagonalLine(Vec2<coordType> Vec_a, Vec2<coordType> Vec_b, u32 Color, const std::string& dir){
+  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
   if(dir == "back" || dir == "downward"){
     /* \  */
     for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
@@ -86,12 +94,14 @@ void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& d
   }
 }
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
-void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=false, bool hflip=false){
+template<typename coordType>
+void OutlineRightTriangle(Vec2<coordType> Vec_a, Vec2<coordType> Vec_b, u32 Color, bool vflip=false, bool hflip=false){
+  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
   if((vflip == true && hflip == false) || (vflip == false && hflip == true)) {
-    DiagnolLine(xa, ya, xb, yb, Color, "back");/*makes 90 degree angle at the right of the base /| */
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");/*makes 90 degree angle at the right of the base /| */
   }
   else{
-    DiagnolLine(xa, ya, xb, yb, Color, "front");/*makes 90 degree angle at the left the of basef |\ */
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "front");/*makes 90 degree angle at the left the of basef |\ */
   }
   for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
     if(vflip == false){
@@ -182,9 +192,10 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     bool Running = true;
 
-    //Initialize a vector `a`
-    typedef Vec3<int> Vec3int;
-    Vec3int a;
+    //Initialize a vector for `top` coordinate and `bot` coordinate
+    typedef Vec2<int> Vec2int;//using integers for coordinates
+    Vec2int top{468, 132};
+    Vec2int bot{936, 600};
 
     while(Running) {
         MSG Message;
@@ -195,19 +206,19 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        // FillSquare       (468, 132, 936, 600, 0x5D3754);// |#|
-        // OutlineSquare    (468, 132, 936, 600, 0xAADB1E);// |_|
-        // VertexPointSquare(468, 132, 936, 600, 0xFFFFFF);// : :
-        // DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "front"); // \ //
-        DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "back"); //  / //
+        FillSquare       (top, bot, 0x5D3754);// |#|
+        OutlineSquare    (top, bot, 0xAADB1E);// |_|
+        VertexPointSquare(top, bot, 0xFFFFFF);// : :
+        DiagonalLine      (top, bot, 0xAADB1E, "front"); // \ //
+        DiagonalLine      (top, bot, 0xAADB1E, "back"); //  / //
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
         //  And the default false, false is a triangle with a right angle at the left side of the base
-        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, false);/*default ->   |\  */
-        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false); /*        ->   |/  */
-        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true); /*        ->   /|  */
-        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);  /*        ->   \|  */
+        OutlineRightTriangle(top, bot, 0xAADB1E, false, false);/*default ->   |\  */
+        OutlineRightTriangle(top, bot, 0xAADB1E, true, false); /*        ->   |/  */
+        OutlineRightTriangle(top, bot, 0xAADB1E, false, true); /*        ->   /|  */
+        OutlineRightTriangle(top, bot, 0xAADB1E, true, true);  /*        ->   \|  */
 
         StretchDIBits(DeviceContext,
                       0, 0,
