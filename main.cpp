@@ -94,11 +94,6 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     DiagnolLine(xa, ya, xb, yb, Color, "back");/*back would make 90 degree angle at the right of the base /| */
   }
   if(hflip==false){
-    for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
-      if(vflip == false){
-        DrawPixel(dx, yb, Color);//Horiz bot
-        DrawPixel(xa, dy, Color);//Vert left
-      }
     for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){      // xa,ya
       if(vflip == false){                                     //   | \       //
         DrawPixel(dx, yb, Color);//Horiz bot                  //   |  \      //
@@ -117,22 +112,11 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
         DrawPixel(xb, dy, Color);//Vert right
       }
       else{
-		DrawPixel(xa, dy, Color);//Vert left
-		DrawPixel(dx, ya, Color);//Horiz top
-	  }
+        DrawPixel(xa, dy, Color);//Vert left
+        DrawPixel(dx, ya, Color);//Horiz top
+      }
     }
   }
-    for(auto dx=xa,dy=ya;dx < xb && dy < yb+1;dx++,dy++){     //    xa,ya
-      if(vflip == false){                                     //       / |
-        DrawPixel(dx, yb, Color);//Horiz bot                  //      /  |
-        DrawPixel(xb, dy, Color);//Vert right                 //     /   |
-      }                                                       //  xb,yb__|
-      else{
-        DrawPixel(xa, dy, Color);//Vert left                  //   __xa,ya
-        DrawPixel(dx, ya, Color);//Horiz top                  //   |    /
-      }                                                       //   |   /
-    }                                                         //   |  /
-  }                                                           //  xb,yb
 }
 void ClearScreen(u32 Color) {
     u32 *Pixel = (u32 *)BitmapMemory;
