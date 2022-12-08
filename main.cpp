@@ -94,23 +94,18 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     DiagnolLine(xa, ya, xb, yb, Color, "front");/*makes 90 degree angle at the left the of basef |\ */
   }
   for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
+    if(vflip == false){
+      DrawPixel(dx, ya, Color);//Horiz top
+    }
+    else{
+      DrawPixel(dx, yb, Color);//Horiz bot
+    }
+
     if(hflip == false){
       DrawPixel(xa, dy, Color);//Vert left
-      if(vflip == false){
-        DrawPixel(dx, yb, Color);//Horiz bot
-      }
-      else{
-        DrawPixel(dx, ya, Color);//Horiz top
-      }
     }
-    else{//hflip==true
+    else{
       DrawPixel(xb, dy, Color);//Vert right
-      if(vflip == true){
-        DrawPixel(dx, ya, Color);//Horiz top
-      }
-      else{
-        DrawPixel(dx, yb, Color);//Horiz bot
-      }
     }
   }
 }
