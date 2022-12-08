@@ -72,22 +72,22 @@ void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
   }
 }
 void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& dir){
-  if(dir == "back"){
+  if(dir == "back" || dir == "downward"){
     /* \  */
-    for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
+    for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
-  if(dir == "front" || dir == "forward"){
+  if(dir == "front" || dir == "forward" || dir == "upward"){
     /* / */
-    for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
+    for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
 }
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
 void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=false, bool hflip=false){
-  if((hflip == false && vflip == false) || (hflip == true && vflip == true)) {
+  if((vflip == true && hflip == false) || (vflip == false && hflip == true)) {
     DiagnolLine(xa, ya, xb, yb, Color, "back");/*makes 90 degree angle at the right of the base /| */
   }
   else{
@@ -95,10 +95,10 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
   }
   for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
     if(vflip == false){
-      DrawPixel(dx, ya, Color);//Horiz top
+      DrawPixel(dx, yb, Color);//Horiz bot
     }
     else{
-      DrawPixel(dx, yb, Color);//Horiz bot
+      DrawPixel(dx, ya, Color);//Horiz top
     }
 
     if(hflip == false){
@@ -134,7 +134,7 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     WindowClass.lpfnWndProc = WindowProc;
     WindowClass.hInstance = Instance;
     WindowClass.lpszClassName = ClassName;
-    // WindowClass.hCursor = LoadCursor(0, IDC_CROSS);
+    WindowClass.hCursor = LoadCursor(0, IDC_CROSS);
 
     if(!RegisterClass(&WindowClass)) {
         MessageBox(0, L"RegisterClass failed", 0, 0);
@@ -195,19 +195,19 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        FillSquare       (468, 132, 936, 600, 0x5D3754);// |#|
+        // FillSquare       (468, 132, 936, 600, 0x5D3754);// |#|
         // OutlineSquare    (468, 132, 936, 600, 0xAADB1E);// |_|
         // VertexPointSquare(468, 132, 936, 600, 0xFFFFFF);// : :
         // DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "front"); // \ //
-        // DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "back"); //  / //
+        DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "back"); //  / //
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
         //  And the default false, false is a triangle with a right angle at the left side of the base
-        OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, false);/*default ->   |\  */
-        OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false); /*        ->   \|  */
-        OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true); /*        ->   /|  */
-        OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);  /*        ->   |/  */
+        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, false);/*default ->   |\  */
+        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false); /*        ->   |/  */
+        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true); /*        ->   /|  */
+        // OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);  /*        ->   \|  */
 
         StretchDIBits(DeviceContext,
                       0, 0,
