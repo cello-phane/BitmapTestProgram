@@ -94,19 +94,16 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     DiagnolLine(xa, ya, xb, yb, Color, "back");/*back would make 90 degree angle at the right of the base /| */
   }
   if(hflip==false){
-<<<<<<< HEAD
     for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
       if(vflip == false){
         DrawPixel(dx, yb, Color);//Horiz bot
         DrawPixel(xa, dy, Color);//Vert left
       }
-=======
     for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){      // xa,ya
       if(vflip == false){                                     //   | \       //
         DrawPixel(dx, yb, Color);//Horiz bot                  //   |  \      //
         DrawPixel(xa, dy, Color);//Vert left                  //   |   \     //
       }                                                       //   |___xb,yb
->>>>>>> 3a28b1d (Fixed up some comments)
       else{
         DrawPixel(xb, dy, Color);//Vert right                 // xa,ya__
         DrawPixel(dx, ya, Color);//Horiz top                  //    \    |
@@ -114,7 +111,6 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
     }                                                         //      \  |
   }                                                           //      xb,yb
   else{
-<<<<<<< HEAD
     for(auto dx=xa,dy=ya;dx < xb && dy < yb+1;dx++,dy++){
       if(vflip == false){
         DrawPixel(dx, yb, Color);//Horiz bot
@@ -126,7 +122,6 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
 	  }
     }
   }
-=======
     for(auto dx=xa,dy=ya;dx < xb && dy < yb+1;dx++,dy++){     //    xa,ya
       if(vflip == false){                                     //       / |
         DrawPixel(dx, yb, Color);//Horiz bot                  //      /  |
@@ -138,7 +133,6 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
       }                                                       //   |   /
     }                                                         //   |  /
   }                                                           //  xb,yb
->>>>>>> 3a28b1d (Fixed up some comments)
 }
 void ClearScreen(u32 Color) {
     u32 *Pixel = (u32 *)BitmapMemory;
@@ -226,42 +220,6 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        //a perfect square is drawn if y2-y1 = x2 - x1 && y1=2 * x1
-<<<<<<< HEAD
-        FillSquare(468,132,936,600, 0x5D3754);
-         OutlineSquare    (468,132,936,600, 0xAADB1E);
-         VertexPointSquare(468,132,936,600, 0xFFFFFF);
-         DiagnolLine(468, 132, 936, 600, 0xAADB1E, "front");
-         DiagnolLine(468, 132, 936, 600, 0xAADB1E, "back");
-
-        //For the right triangle function:
-        //  The 2 bool parameters after Color are vflip, hflip
-        //  And the default false, false is a triangle with a right angle at the left side of the base
-        /* xa,ya
-           | \
-           |  \     */   OutlineRightTriangle(468,132,936,600, 0xAADB1E);//default is false false
-        /* |   \
-           |___xb,yb */
-
-        /* xa,ya__
-            \    |
-             \   |  */   OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false);
-        /*    \  |
-              xb,yb */
-
-        /*    xa,ya
-               / |
-              /  | */    OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true);
-        /*   /   |
-          xb,yb__| */
-
-        /*   __xa,ya
-             |    /
-             |   / */    OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);
-        /*   |  /
-             xb,yb */
-=======
-        FillSquare       (468, 132, 936, 600, 0x5D3754);// |#|
         OutlineSquare    (468, 132, 936, 600, 0xAADB1E);// |_|
         VertexPointSquare(468, 132, 936, 600, 0xFFFFFF);// : :
         DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "front"); // \ //
@@ -274,7 +232,6 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, false); /*        ->   \|  */
         OutlineRightTriangle(468,132,936,600, 0xAADB1E, false, true); /*        ->   /|  */
         OutlineRightTriangle(468,132,936,600, 0xAADB1E, true, true);  /*        ->   |/  */
->>>>>>> 3a28b1d (Fixed up some comments)
 
         StretchDIBits(DeviceContext,
                       0, 0,
