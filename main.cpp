@@ -104,8 +104,8 @@ void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=
         DrawPixel(dx, ya, Color);//Horiz top                  //    \    |
       }                                                       //     \   |
     }                                                         //      \  |
-                                                              //      xb,yb
-
+  }                                                           //      xb,yb
+  else {
     for(auto dx=xa,dy=ya;dx < xb && dy < yb;dx++,dy++){       //      xa,ya
       if(vflip == false){                                     //       / |
         DrawPixel(dx, yb, Color);//Horiz bot                  //      /  |
