@@ -72,14 +72,14 @@ void FillSquare(int xa, int ya, int xb, int yb, u32 Color){
   }
 }
 void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& dir){
-  if(dir == "forward"){
-    // like a forwardslash
+  if(dir == "back"){
+    /* \  */
     for(auto dx=xa,dy=ya;dx<=xb && dy<=yb;dx++,dy++){
       DrawPixel(dx, dy, Color);
     }
   }
-  if(dir == "back"){
-    // like a backslash
+  if(dir == "front" || dir == "forward"){
+    /* / */
     for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;dx--,dy++){
       DrawPixel(dx, dy, Color);
     }
@@ -87,36 +87,32 @@ void DiagnolLine(int xa, int ya, int xb, int yb, u32 Color, const std::string& d
 }
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
 void OutlineRightTriangle(int xa, int ya, int xb, int yb, u32 Color, bool vflip=false, bool hflip=false){
-  if (hflip==false) {
-    DiagnolLine(xa, ya, xb, yb, Color, "forward");/*forward would make 90 degree angle at the left of the base |\ */
+  if((hflip == false && vflip == false) || (hflip == true && vflip == true)) {
+    DiagnolLine(xa, ya, xb, yb, Color, "back");/*makes 90 degree angle at the right of the base /| */
   }
-  else {
-    DiagnolLine(xa, ya, xb, yb, Color, "back");/*back would make 90 degree angle at the right of the base /| */
+  else{
+    DiagnolLine(xa, ya, xb, yb, Color, "front");/*makes 90 degree angle at the left the of basef |\ */
   }
-  if(hflip==false){
-    for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){      // xa,ya
-      if(vflip == false){                                     //   | \       //
-        DrawPixel(dx, yb, Color);//Horiz bot                  //   |  \      //
-        DrawPixel(xa, dy, Color);//Vert left                  //   |   \     //
-      }                                                       //   |___xb,yb
+  for(auto dx=xa, dy=ya;dx < xb && dy < yb;dy++,dx++){
+    if(hflip == false){
+      DrawPixel(xa, dy, Color);//Vert left
+      if(vflip == false){
+        DrawPixel(dx, yb, Color);//Horiz bot
+      }
       else{
-        DrawPixel(xb, dy, Color);//Vert right                 // xa,ya__
-        DrawPixel(dx, ya, Color);//Horiz top                  //    \    |
-      }                                                       //     \   |
-    }                                                         //      \  |
-                                                              //      xb,yb
-
-    for(auto dx=xa,dy=ya;dx < xb && dy < yb;dx++,dy++){       //      xa,ya
-      if(vflip == false){                                     //       / |
-        DrawPixel(dx, yb, Color);//Horiz bot                  //      /  |
-        DrawPixel(xb, dy, Color);//Vert right                 //     /   |
-      }                                                       //  xb,yb__|
+        DrawPixel(dx, ya, Color);//Horiz top
+      }
+    }
+    else{//hflip==true
+      DrawPixel(xb, dy, Color);//Vert right
+      if(vflip == true){
+        DrawPixel(dx, ya, Color);//Horiz top
+      }
       else{
-        DrawPixel(xa, dy, Color);//Vert left                  //   __xa,ya
-        DrawPixel(dx, ya, Color);//Horiz top                  //   |    /
-      }                                                       //   |   /
-    }                                                         //   |  /
-  }                                                           //  xb,yb
+        DrawPixel(dx, yb, Color);//Horiz bot
+      }
+    }
+  }
 }
 void ClearScreen(u32 Color) {
     u32 *Pixel = (u32 *)BitmapMemory;
@@ -204,10 +200,11 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        OutlineSquare    (468, 132, 936, 600, 0xAADB1E);// |_|
-        VertexPointSquare(468, 132, 936, 600, 0xFFFFFF);// : :
-        DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "front"); // \ //
-        DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "back"); //  / //
+        FillSquare       (468, 132, 936, 600, 0x5D3754);// |#|
+        // OutlineSquare    (468, 132, 936, 600, 0xAADB1E);// |_|
+        // VertexPointSquare(468, 132, 936, 600, 0xFFFFFF);// : :
+        // DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "front"); // \ //
+        // DiagnolLine      (468, 132, 936, 600, 0xAADB1E, "back"); //  / //
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
