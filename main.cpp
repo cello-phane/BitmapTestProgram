@@ -25,6 +25,7 @@ public:
   Vec2() : x(T(0)), y(T(0)) {}
   Vec2(const T &xx) : x(xx), y(xx) {}
   Vec2(T xx, T yy) : x(xx), y(yy) {}
+  ~Vec2() {}
   T x, y;
 };
 
@@ -136,9 +137,9 @@ void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
   Vec2<coordType> Vec_c {xb,ya};
   Vec2<coordType> Vec_d {xa+xb,yb};
   DiagonalLine<coordType>(Vec_c, Vec_d, Color, "back");
-  for(auto dx=xb, dy=yb;dx < xa+xb;++dx,--dy){
-    DrawPixel(dx-(xb-xa), yb, Color);//Horiz bot
-    DrawPixel(dx, yb+(ya-yb), Color);//Horiz top
+  for(auto dx=xb-xa;dx < xb;++dx){
+    DrawPixel(dx, yb, Color);//Horiz bot
+    DrawPixel(dx+(xb-xa), yb-(xb-xa), Color);//Horiz top
   }
 }
 void ClearScreen(u32 Color) {
@@ -216,9 +217,20 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     //Initialize a vector for `top` coordinate and `bot` coordinate
     typedef Vec2<int> Vec2int;//using integers for coordinates
-    Vec2int top{468, 132};
-    Vec2int bot{936, 600};
-
+    Vec2int top{668, 132};
+    Vec2int bot{1336, 800};
+    //top = xa,ya and bot = ya,yb
+    //  coordinates have these properties:
+    //The points would result in equal sides if these are true:
+    // xb = xa * 2
+    // xa - yb + ya = 0
+    //--Other properties:
+    // yb - ya = xa
+    // xa + ya = yb
+    // xb - xa + ya = yb
+    // xb - yb + ya = xa
+    // xa - ya + yb = xb
+    // xa - xb + yb = ya
     u32 purple = 0x5D3754;
     u32 green = 0xAADB1E;
     while(Running) {
@@ -230,21 +242,21 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        // FillSquare       (top, bot, purple);// |#|
-        // OutlineSquare    (top, bot, green);// |_|
-        // VertexPointSquare(top, bot, green);// : :
-        // DiagonalLine      (top, bot, green, "front"); // \ //
-        // DiagonalLine      (top, bot, green, "back"); //  / //
+        FillSquare       (top, bot, purple);// |#|
+        OutlineSquare    (top, bot, green);// |_|
+        VertexPointSquare(top, bot, green);// : :
+        DiagonalLine      (top, bot, green, "front"); // \ //
+        DiagonalLine      (top, bot, green, "back"); //  / //
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
         //  And the default false, false is a triangle with a right angle at the left side of the base
-        // OutlineRightTriangle(top, bot, green, false, false);/*default ->   |\  */
-        // OutlineRightTriangle(top, bot, green, true, false); /*        ->   |/  */
-        // OutlineRightTriangle(top, bot, green, false, true); /*        ->   /|  */
-        // OutlineRightTriangle(top, bot, green, true, true);  /*        ->   \|  */
-        //the bool below is for vflip
-        //OutlineParallelogram(top, bot, green, false);
+        OutlineRightTriangle(top, bot, green, false, false);/*default ->   |\  */
+        OutlineRightTriangle(top, bot, green, true, false); /*        ->   |/  */
+        OutlineRightTriangle(top, bot, green, false, true); /*        ->   /|  */
+        OutlineRightTriangle(top, bot, green, true, true);  /*        ->   \|  */
+        //TODO: the bool vflip is set to false, needs updating
+        OutlineParallelogram(top, bot, green, false);
         OutlineEquilTriangle(top, bot, green, false);
         StretchDIBits(DeviceContext,
                       0, 0,
