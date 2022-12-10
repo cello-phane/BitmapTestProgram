@@ -131,15 +131,27 @@ void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
   }
 }
 template<typename coordType>
-void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, bool vflip=false){
+void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, const std::string& dir="right"){
   auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
-  DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");
   Vec2<coordType> Vec_c {xb,ya};
   Vec2<coordType> Vec_d {xa+xb,yb};
-  DiagonalLine<coordType>(Vec_c, Vec_d, Color, "back");
-  for(auto dx=xb-xa;dx < xb;++dx){
-    DrawPixel(dx, yb, Color);//Horiz bot
-    DrawPixel(dx+(xb-xa), yb-(xb-xa), Color);//Horiz top
+  if (dir == "right"){
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");
+    DiagonalLine<coordType>(Vec_c, Vec_d, Color, "back");
+  }
+  else if (dir == "left"){
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "front");
+    DiagonalLine<coordType>(Vec_c, Vec_d, Color, "front");
+  }
+  for(auto dx=xb-xa, dx_=xb+xa;dx < xb;++dx,--dx_){
+    if(dir == "left"){
+      DrawPixel(dx, ya, Color);//Horiz bot
+      DrawPixel(dx_, yb, Color);//Horiz top
+    }
+    else{
+      DrawPixel(dx, yb, Color);//Horiz bot
+      DrawPixel(dx+(xb-xa), yb-(xb-xa), Color);//Horiz top
+    }
   }
 }
 void ClearScreen(u32 Color) {
@@ -244,22 +256,22 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         }
         ClearScreen(0x333333);
         /*        Function Calls        */
-        FillSquare       (top, bot, purple);// |#|
-        OutlineSquare    (top, bot, green);// |_|
-        VertexPointSquare(top, bot, green);// : :
-        DiagonalLine      (top, bot, green, "front"); // \ //
-        DiagonalLine      (top, bot, green, "back"); //  / //
+        FillSquare       (top, bot, purple);// "|#|"
+        // OutlineSquare    (top, bot, green);// "|_|"
+        // VertexPointSquare(top, bot, green);// ": :"
+        // DiagonalLine      (top, bot, green, "front"); // "\" //
+        // DiagonalLine      (top, bot, green, "back"); //  "/" //
 
         //For the right triangle function:
         //  The 2 bool parameters after Color are vflip, hflip
         //  And the default false, false is a triangle with a right angle at the left side of the base
-        OutlineRightTriangle(top, bot, green, false, false);/*default ->   |\  */
-        OutlineRightTriangle(top, bot, green, true, false); /*        ->   |/  */
-        OutlineRightTriangle(top, bot, green, false, true); /*        ->   /|  */
-        OutlineRightTriangle(top, bot, green, true, true);  /*        ->   \|  */
-        //TODO: the bool vflip is set to false, needs updating
-        OutlineParallelogram(top, bot, green, false);
-        OutlineEquilTriangle(top, bot, green, false);
+        OutlineRightTriangle(top, bot, green, false, false);/*default ->   "|\"  */
+        OutlineRightTriangle(top, bot, green, true, false); /*        ->   "|/"  */
+        OutlineRightTriangle(top, bot, green, false, true); /*        ->   "/|"  */
+        OutlineRightTriangle(top, bot, green, true, true);  /*        ->   "\|"  */
+        OutlineParallelogram(top, bot, green, "left");/*              ->   "\\"  */
+        OutlineParallelogram(top, bot, green, "right");/*             ->   "//"  */
+        OutlineEquilTriangle(top, bot, green, false);/*               ->   "/\"  */
         StretchDIBits(DeviceContext,
                       0, 0,
                       BitmapWidth, BitmapHeight,
