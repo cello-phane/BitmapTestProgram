@@ -217,9 +217,11 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     //Initialize a vector for `top` coordinate and `bot` coordinate
     typedef Vec2<int> Vec2int;//using integers for coordinates
-    Vec2int top{668, 132};
-    Vec2int bot{1336, 800};
-    //top = xa,ya and bot = ya,yb
+    Vec2int window_relative_top = {ClientWidth/4, ClientHeight/6};
+    Vec2int window_relative_bot = {ClientWidth/2, window_relative_top.x + window_relative_top.y};
+    Vec2int top{window_relative_top.x, window_relative_top.y};
+    Vec2int bot{window_relative_bot.x, window_relative_bot.y};
+    //top = xa,ya and bot = ya,yb // these coordinates are top left and bottom right of the geometric object
     //  coordinates have these properties:
     //The points would result in equal sides if these are true:
     // xb = xa * 2
