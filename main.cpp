@@ -15,18 +15,33 @@ int BitmapHeight;
 int ClientWidth;
 int ClientHeight;
 
-template<typename T>
-//Vector for the x,y,and (and possibly z coords (not a vec datatype from C++ of course..)
+//Vector for the x,y
 //The type of vec can be float,int, or double
-class Vec2
+template<typename T>
+struct Vec2
 {
-public:
-  // 3 most basic ways of initializing a vector
   Vec2() : x(T(0)), y(T(0)) {}
-  Vec2(const T &xx) : x(xx), y(xx) {}
-  Vec2(T xx, T yy) : x(xx), y(yy) {}
-  ~Vec2() {}
+  Vec2(const T &x_) : x(x_), y(x_) {}
+  Vec2(T x_, T y_) : x(x_), y(y_) {}
+private:
   T x, y;
+public:
+  T getX() const
+  {
+    return x;
+  }
+  void setX(T x_)
+  {
+    x = x_;
+  }
+  T getY() const
+  {
+    return y;
+  }
+  void setY(T y_)
+  {
+    y = y_;
+  }
 };
 
 // Draws a pixel at X, Y (from top left corner)
@@ -47,7 +62,7 @@ void DrawPixel(int X, int Y, u32& Color) {
 // Coordinates passed are the top left xy and bot right xy
 template<typename coordType>
 void OutlineSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   for(auto x = xb - xa;x < xb;++x){
     DrawPixel(x, yb, Color); //Horiz bottom
     DrawPixel(x, ya, Color); //Horiz top
@@ -61,7 +76,7 @@ void OutlineSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
 //Draws pixel points on each corner point(vertex)
 template<typename coordType>
 void VertexPointSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   DrawPixel(xb - xa, ya, Color);      //top left point
   DrawPixel(xb, ya, Color);           //top right point
   DrawPixel(xb - xa, yb, Color);      //bot left point
@@ -70,7 +85,7 @@ void VertexPointSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Colo
 //Fills the area inside the coordinates
 template<typename coordType>
 void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   //Draw Horiz Parallel lines and  Vert Parallel lines
   for(auto x = xb - xa;x < xb;++x){
     for(auto y = ya;y <= yb;++y){
@@ -80,7 +95,7 @@ void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
 }
 template<typename coordType>
 void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, const std::string& dir){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   if(dir == "back" || dir == "downward"){
     /* \  */
     for(auto dx=xb,dy=ya;dx>=xa && dy<=yb;--dx,++dy){
@@ -97,7 +112,7 @@ void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, co
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
 template<typename coordType>
 void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, bool vflip=false, bool hflip=false){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   if((vflip == true && hflip == false) || (vflip == false && hflip == true)) {
     DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");/*makes 90 degree angle at the right of the base /| */
   }
@@ -121,10 +136,10 @@ void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
 }
 template<typename coordType>
 void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, bool vflip=false){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");
-  Vec2<coordType> Vec_c {Vec_a.x+(Vec_b.x-Vec_a.x), Vec_a.y};
-  Vec2<coordType> Vec_d {Vec_b.x+(Vec_b.x-Vec_a.x), Vec_b.y};
+  Vec2<coordType> Vec_c {xa+(xb-xa), ya};
+  Vec2<coordType> Vec_d {xb+(xb-xa), yb};
   DiagonalLine<coordType>(Vec_c, Vec_d, Color, "front");
   for(auto dx=xb-(xb-xa);dx < xb+(yb-ya);++dx){
     DrawPixel(dx, yb, Color);//Horiz bot
@@ -132,7 +147,7 @@ void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
 }
 template<typename coordType>
 void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, const std::string& dir="right"){
-  auto xa = Vec_a.x, ya = Vec_a.y, xb = Vec_b.x, yb = Vec_b.y;
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   Vec2<coordType> Vec_c {xb,ya};
   Vec2<coordType> Vec_d {xa+xb,yb};
   if (dir == "right"){
@@ -230,9 +245,9 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     //Initialize a vector for `top` coordinate and `bot` coordinate
     typedef Vec2<int> Vec2int;//using integers for coordinates
     Vec2int window_relative_top = {ClientWidth/4, ClientHeight/6};
-    Vec2int window_relative_bot = {ClientWidth/2, window_relative_top.x + window_relative_top.y};
-    Vec2int top{window_relative_top.x, window_relative_top.y};
-    Vec2int bot{window_relative_bot.x, window_relative_bot.y};
+    Vec2int window_relative_bot = {ClientWidth/2, window_relative_top.getX() + window_relative_top.getY()};
+    Vec2int top{window_relative_top.getX(), window_relative_top.getY()};
+    Vec2int bot{window_relative_bot.getX(), window_relative_bot.getY()};
     //top = xa,ya and bot = ya,yb // these coordinates are top left and bottom right of the geometric object
     //  coordinates have these properties:
     //The points would result in equal sides if these are true:
