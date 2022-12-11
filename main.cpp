@@ -23,9 +23,7 @@ struct Vec2
   Vec2() : x(T(0)), y(T(0)) {}
   Vec2(const T &x_) : x(x_), y(x_) {}
   Vec2(T x_, T y_) : x(x_), y(y_) {}
-private:
-  T x, y;
-public:
+
   T getX() const
   {
     return x;
@@ -42,13 +40,26 @@ public:
   {
     y = y_;
   }
+private:
+  T x, y;
 };
-
-// Draws a pixel at X, Y (from top left corner)
+// Draws a // pixel at X, Y (from top left corner)
+void DrawPixel_s(int X, int Y, u32& Color) {
+  u32 *Pixel = (u32 *)BitmapMemory;
+  Pixel += Y * BitmapWidth + X;
+  *Pixel = Color;
+}
+// Draws a // pixel at X, Y (from top left corner)
 void DrawPixel(int X, int Y, u32& Color) {
-    u32 *Pixel = (u32 *)BitmapMemory;
-    Pixel += Y * BitmapWidth + X;
-    *Pixel = Color;
+  u32 *Pixel = (u32 *)BitmapMemory;
+  Pixel += Y * BitmapWidth + X;
+  *Pixel = Color;
+  u32 *Pixel_a = (u32 *)BitmapMemory;
+  u32 *Pixel_b = (u32 *)BitmapMemory;
+  Pixel_a += (Y) * BitmapWidth + (X+1);
+  Pixel_b += (Y) * BitmapWidth + (X-1);
+  *Pixel_a = Color;
+  *Pixel_b = Color;
 }
 
 //The functions for squares and lines below use these coordinate xy
@@ -94,7 +105,8 @@ void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color){
   }
 }
 template<typename coordType>
-void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, const std::string& dir){
+void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
+                  u32& Color, const std::string& dir){
   auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   if(dir == "back" || dir == "downward"){
     /* \  */
@@ -111,13 +123,14 @@ void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, co
 }
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
 template<typename coordType>
-void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, bool vflip=false, bool hflip=false){
+void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
+                          u32& Color, bool vflip=false, bool hflip=false){
   auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   if((vflip == true && hflip == false) || (vflip == false && hflip == true)) {
-    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");/*makes 90 degree angle at the right of the base /| */
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");/* /| */
   }
   else{
-    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "front");/*makes 90 degree angle at the left the of basef |\ */
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "front");/* |\ */
   }
  for(auto dx=xa, dy=ya;dx < xb && dy < yb;++dy,++dx){
     if(vflip == false){
@@ -135,7 +148,8 @@ void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
   }
 }
 template<typename coordType>
-void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, bool vflip=false){
+void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
+                          u32& Color, bool vflip=false){
   auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");
   Vec2<coordType> Vec_c {xa+(xb-xa), ya};
@@ -146,7 +160,8 @@ void OutlineEquilTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& C
   }
 }
 template<typename coordType>
-void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, const std::string& dir="right"){
+void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
+                          u32& Color, const std::string& dir="right"){
   auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   Vec2<coordType> Vec_c {xb,ya};
   Vec2<coordType> Vec_d {xa+xb,yb};
@@ -175,7 +190,21 @@ void ClearScreen(u32 Color) {
         Index < BitmapWidth * BitmapHeight;
         ++Index) { *Pixel++ = Color; }
 }
-
+//Fills the area inside the coordinates
+template<typename coordType>
+void OutlineGrid(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, int&& cell_size, u32& Color){
+  auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
+  for(auto x = xa;x < xb;++x){
+    for(auto dy=ya;dy < yb;dy=dy+cell_size){
+        DrawPixel_s(x, dy, Color);
+    }
+  }
+  for(auto y = ya;y < yb;++y){
+    for(auto dx=xa;dx < xb;dx=dx+cell_size){
+        DrawPixel_s(dx, y, Color);
+    }
+  }
+}
 LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam) {
     switch(Message) {
         case WM_KEYDOWN: {
@@ -201,11 +230,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         return GetLastError();
     }
 
-    HWND Window = CreateWindowEx(0, ClassName, L"Program",
-                                 WS_OVERLAPPEDWINDOW|WS_VISIBLE,
-                                 CW_USEDEFAULT, CW_USEDEFAULT,
-                                 CW_USEDEFAULT, CW_USEDEFAULT,
-                                 0, 0, Instance, 0);
+    HWND Window = CreateWindowEx(0, ClassName, L"Program",WS_OVERLAPPEDWINDOW|WS_VISIBLE,
+                                 CW_USEDEFAULT, CW_USEDEFAULT,CW_USEDEFAULT, CW_USEDEFAULT,0, 0, Instance, 0);
     if(!Window) {
         MessageBox(0, L"CreateWindowEx failed", 0, 0);
         return GetLastError();
@@ -213,8 +239,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     // Get client area dimensions
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
-    ClientWidth = ClientRect.right - ClientRect.left + 600;
-    ClientHeight = ClientRect.bottom - ClientRect.top + 350;
+    ClientWidth = ClientRect.right - ClientRect.left + 1052;
+    ClientHeight = ClientRect.bottom - ClientRect.top + 352;
 
     BitmapWidth = ClientWidth;
     BitmapHeight = ClientHeight;
@@ -222,11 +248,7 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     // Allocate memory for the bitmap
     int BytesPerPixel = 4;
 
-    BitmapMemory = VirtualAlloc(0,
-                                BitmapWidth * BitmapHeight * BytesPerPixel,
-                                MEM_RESERVE|MEM_COMMIT,
-                                PAGE_READWRITE
-                                );
+    BitmapMemory = VirtualAlloc(0,BitmapWidth * BitmapHeight * BytesPerPixel,MEM_RESERVE|MEM_COMMIT,PAGE_READWRITE);
 
     // BitmapInfo struct for StretchDIBits
     BITMAPINFO BitmapInfo;
@@ -244,10 +266,11 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
 
     //Initialize a vector for `top` coordinate and `bot` coordinate
     typedef Vec2<int> Vec2int;//using integers for coordinates
-    Vec2int window_relative_top = {ClientWidth/4, ClientHeight/6};
-    Vec2int window_relative_bot = {ClientWidth/2, window_relative_top.getX() + window_relative_top.getY()};
-    Vec2int top{window_relative_top.getX(), window_relative_top.getY()};
-    Vec2int bot{window_relative_bot.getX(), window_relative_bot.getY()};
+    Vec2int top = {BitmapWidth/4, BitmapHeight/6};
+    Vec2int bot = {BitmapWidth/2, top.getX() + top.getY()};
+    Vec2int max_top{18, 17};
+    Vec2int max_bot{1900, 988};//w, h
+
     //top = xa,ya and bot = ya,yb // these coordinates are top left and bottom right of the geometric object
     //  coordinates have these properties:
     //The points would result in equal sides if these are true:
@@ -260,8 +283,12 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     // xb - yb + ya = xa
     // xa - ya + yb = xb
     // xa - xb + yb = ya
-    u32 purple = 0x5D3754;
-    u32 green = 0xAADB1E;
+   [[maybe_unused]] u32 darkgrey = 0x1F2022;
+   [[maybe_unused]] u32 offwhite = 0xF2E9EA;//
+   [[maybe_unused]] u32 purple = 0x5D3754;
+   [[maybe_unused]] u32 green = 0xAADB1E;
+   [[maybe_unused]] u32 cyan = 0xBDDED4;
+   [[maybe_unused]] u32 cyan_light = 0xC8EBE0;
     while(Running) {
         MSG Message;
         while(PeekMessage(&Message, nullptr, 0, 0, PM_REMOVE)) {
@@ -269,31 +296,26 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
             TranslateMessage(&Message);
             DispatchMessage(&Message);
         }
-        ClearScreen(0x333333);
-        /*        Function Calls        */
-        FillSquare       (top, bot, purple);// "|#|"
-        // OutlineSquare    (top, bot, green);// "|_|"
-        // VertexPointSquare(top, bot, green);// ": :"
-        // DiagonalLine      (top, bot, green, "front"); // "\" //
-        // DiagonalLine      (top, bot, green, "back"); //  "/" //
+        ClearScreen(offwhite);
+        /*        Function Call        */
+        OutlineGrid      (max_top, max_bot, 20, cyan_light);
+        // FillSquare       (top, bot, green);// "|#|"        // OutlineSquare(top, bot, green);// "|_|"
+        // VertexPointSquare(top, bot, purple);// ": :"
+        // DiagonalLine      (top, bot, purple, "front"); // "\" //
+        // DiagonalLine      (top, bot, purple, "back"); //  "/" //
 
-        //For the right triangle function:
-        //  The 2 bool parameters after Color are vflip, hflip
-        //  And the default false, false is a triangle with a right angle at the left side of the base
-        OutlineRightTriangle(top, bot, green, false, false);/*default ->   "|\"  */
-        OutlineRightTriangle(top, bot, green, true, false); /*        ->   "|/"  */
-        OutlineRightTriangle(top, bot, green, false, true); /*        ->   "/|"  */
-        OutlineRightTriangle(top, bot, green, true, true);  /*        ->   "\|"  */
-        OutlineParallelogram(top, bot, green, "left");/*              ->   "\\"  */
-        OutlineParallelogram(top, bot, green, "right");/*             ->   "//"  */
-        OutlineEquilTriangle(top, bot, green, false);/*               ->   "/\"  */
-        StretchDIBits(DeviceContext,
-                      0, 0,
-                      BitmapWidth, BitmapHeight,
-                      0, 0,
-                      ClientWidth, ClientHeight,
-                      BitmapMemory, &BitmapInfo,
-                      DIB_RGB_COLORS, SRCCOPY);
+        // For the right triangle function:
+         // The 2 bool parameters after Color are vflip, hflip
+         // And the default false, false is a triangle with a right angle at the left side of the base
+        // OutlineRightTriangle(top, bot, purple, false, false);/*default ->   "|\"  */
+        // OutlineRightTriangle(top, bot, purple, true, false); /*        ->   "|/"  */
+        // OutlineRightTriangle(top, bot, purple, false, true); /*        ->   "/|"  */
+        // OutlineRightTriangle(top, bot, purple, true, true);  /*        ->   "\|"  */
+        OutlineParallelogram(top, bot, purple, "left");/*              ->   "\\"  */
+        OutlineParallelogram(top, bot, purple, "right");/*             ->   "//"  */
+        // OutlineEquilTriangle(top, bot, purple, false);/*               ->   "/\"  */
+        StretchDIBits(DeviceContext,0, 0,BitmapWidth, BitmapHeight,0, 0,ClientWidth, ClientHeight,
+                      BitmapMemory, &BitmapInfo,DIB_RGB_COLORS, SRCCOPY);
     }
 
     return 0;
