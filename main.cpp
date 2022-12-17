@@ -251,15 +251,25 @@ void OutlineGrid(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, int& cell_size,
   u32 mid_color = 0xAADB1E;
   auto h_ = std::div(height,cell_size*col_row_cell_n);
   auto w_ = std::div(width,cell_size*col_row_cell_n);
-  auto height_normal = height - static_cast<int>((h_.quot/2) * (cell_size*col_row_cell_n));
-  auto width_normal = width - static_cast<int>((w_.quot/2) * (cell_size*col_row_cell_n));
-  auto height_offset = height_normal+(cell_size*col_row_cell_n) < (height/2)
-                      ? h_.rem+(cell_size*col_row_cell_n) : h_.rem;
-  auto width_offset = width_normal+(cell_size*col_row_cell_n) < (width/2)
-                      ? w_.rem+(cell_size*col_row_cell_n) : w_.rem;
-  //assert(height == h_.quot * cell_size + h_.rem);
-  VLine(width_normal-width_offset,height_normal-height_offset,mid_color);
-  HLine(width_normal-width_offset,height_normal-height_offset,mid_color);
+  auto height_normal = static_cast<int>((h_.quot/2) * (cell_size*col_row_cell_n));
+  auto width_normal = static_cast<int>((w_.quot/2) * (cell_size*col_row_cell_n));
+  auto dh = height-height_normal;
+  if(dh > cell_size*col_row_cell_n){
+    height = height_normal + cell_size * col_row_cell_n;
+  }
+  else{
+    height = height_normal - cell_size * col_row_cell_n;
+  }
+  auto dw = width-width_normal;
+  if(dw > cell_size*col_row_cell_n){
+    width = width_normal + cell_size * col_row_cell_n;
+  }
+  else{
+    width = width_normal - cell_size * col_row_cell_n;
+  }
+  //assert(height == h_.quot * (cell_size*col_row_cell_n) + h_.rem);
+  VLine(width,height,mid_color);
+  HLine(width,height,mid_color);
 }
 LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam) {
     switch(Message) {
