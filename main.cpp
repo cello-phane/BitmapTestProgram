@@ -362,26 +362,27 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         ClearScreen(offwhite);
         /*        Function Call        */
         OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, grey_lite);
-
-        // HLine(ClientWidth-1, ClientHeight/2, green);
-        // VLine(ClientWidth/2, ClientHeight-1, green);
-        // DrawPixel(ClientWidth/2, ClientHeight/2,purple);
+        //draw another two lines of both x and y axes
+        HLine(ClientWidth-1, (ClientHeight/2)+cell_size-5, green);
+        VLine((ClientWidth/2)+1, ClientHeight-1, green);
+        //draw a dot for the center
+        DrawPixel((ClientWidth/2)+1, (ClientHeight/2)+cell_size-5,purple);
 
         //Sample of functions
         //top = xa,ya and bot = ya,yb // these coordinates are top left and bottom right
-        Vec2int top = {(BitmapWidth/4)-15, (BitmapHeight/6)+79};
-        Vec2int bot = {(BitmapWidth/2)-29, (top.getX() + top.getY())};
-        // FillSquare        (top, bot, bluegrey, "right");        /*        ->   "|#|" */
-        // OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
-        // VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
-        // DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
-        // DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
-        // OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
-        // OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
-        // OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
-        // OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
-        // OutlineParallelogram(top, bot, purp_lite, "left");      /*        ->   "\\"  */
-        // OutlineParallelogram(top, bot, purp_lite, "right");     /*        ->   "//"  */
+        Vec2int top = {(BitmapWidth/4)-15, (BitmapHeight/6)+80};
+        Vec2int bot = {(BitmapWidth/2)-30, (top.getX() + top.getY())};
+        FillSquare        (top, bot, bluegrey, "right");        /*        ->   "|#|" */
+        OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
+        VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
+        DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
+        DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
+        OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
+        OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
+        OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
+        OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
+        OutlineParallelogram(top, bot, purp_lite, "left");      /*        ->   "\\"  */
+        OutlineParallelogram(top, bot, purp_lite, "right");     /*        ->   "//"  */
         OutlineEquilTriangle(top, bot, purp_lite, false);       /*        ->   "/\"  */
         StretchDIBits(DeviceContext,0, 0,BitmapWidth, BitmapHeight,0, 0,ClientWidth, ClientHeight,
                       BitmapMemory, &BitmapInfo,DIB_RGB_COLORS, SRCCOPY);
