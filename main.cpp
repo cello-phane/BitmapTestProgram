@@ -254,15 +254,25 @@ void OutlineGrid(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, int& cell_size,
   auto height_normal = static_cast<int>((h_.quot/2) * (cell_size*col_row_cell_n));
   auto width_normal = static_cast<int>((w_.quot/2) * (cell_size*col_row_cell_n));
   auto dh = height-height_normal;
-  if(dh > cell_size*col_row_cell_n){
-    height = height_normal + cell_size * col_row_cell_n;
+  if(dh > ((cell_size*col_row_cell_n)+1)){
+    if(height_normal - (cell_size * col_row_cell_n) < height){
+      height = height_normal + cell_size * col_row_cell_n;
+    }
+    else{
+      height = height_normal;
+    }
   }
   else{
     height = height_normal - cell_size * col_row_cell_n;
   }
   auto dw = width-width_normal;
-  if(dw > cell_size*col_row_cell_n){
-    width = width_normal + cell_size * col_row_cell_n;
+  if(dw > ((cell_size*col_row_cell_n)+1)){
+    if(width_normal - (cell_size * col_row_cell_n) < width){
+      width = width_normal + cell_size * col_row_cell_n;
+    }
+    else{
+      width = width_normal;
+    }
   }
   else{
     width = width_normal - cell_size * col_row_cell_n;
@@ -305,8 +315,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     // Get client area dimensions
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
-    ClientWidth = (ClientRect.right*2) + (ClientRect.left*2)-680;
-    ClientHeight = (ClientRect.bottom*2) + (ClientRect.top*2)-340;
+    ClientWidth = (ClientRect.right*2) + (ClientRect.left*2)-850;
+    ClientHeight = (ClientRect.bottom*2) + (ClientRect.top*2)-330;
 
     BitmapWidth = ClientWidth;
     BitmapHeight = ClientHeight;
@@ -334,12 +344,12 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     int cell_size = 20;
     int col_row_cell_n = 5;
     //padding offset for grid, in px
-    //auto grid_pad_left = 1, grid_pad_top = 1;
+    auto grid_pad_left = 1, grid_pad_top = 1;
     typedef Vec2<int> Vec2int;//using integers for coordinates
-    //Vec2int grid_top{grid_pad_left, grid_pad_top};
-    //Vec2int grid_bot{ClientWidth, ClientHeight};//w, h
-    Vec2int grid_top{0,1};
-    Vec2int grid_bot{1920,1088};
+    Vec2int grid_top{grid_pad_left, grid_pad_top};
+    Vec2int grid_bot{ClientWidth, ClientHeight};//w, h
+    // Vec2int grid_top{0,1};
+    // Vec2int grid_bot{1920,1088};
 
     while(Running) {
         MSG Message;
