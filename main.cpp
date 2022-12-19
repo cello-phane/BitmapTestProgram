@@ -115,36 +115,37 @@ void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, std:
 }
 
 void HLine(int& X, int& Y, u32& Color) {
-  for(auto x=0;x<static_cast<int>(X/2);++x){
+  for(auto x=1;x<static_cast<int>(X/2)+465;++x){
     DrawPixel(X+x, Y, Color);
     DrawPixel(X-x, Y, Color);
   }
 }
 
-void VLine(int X, int Y, u32& Color) {
-  for(auto y=0;y<static_cast<int>(Y/2);++y){
+void VLine(int X, int Y, u32& Color){
+  for(auto y=1;y<static_cast<int>(Y/2)+270;++y){
     DrawPixel(X, Y+y, Color);
     DrawPixel(X, Y-y, Color);
   }
 }
-  
+
 template<typename coordType>
 void DiagonalLine(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
                   u32& Color, const std::string& dir){
   auto xa = Vec_a.getX(), ya = Vec_a.getY(), xb = Vec_b.getX(), yb = Vec_b.getY();
   if(dir == "back" || dir == "downward"){
-    /* \  */
-    for(auto dx=xb,dy=ya;dx>xa && dy<yb;--dx,++dy){
+    /* /  */
+    for(auto dx=xa,dy=yb;dx<xb && dy>ya;++dx,--dy){
       DrawPixel(dx, dy, Color);
     }
   }
   if(dir == "front" || dir == "forward" || dir == "upward"){
-    /* / */
-    for(auto dx=xa,dy=ya;dx<xb && dy<yb;++dx,++dy){
+    /* \ */
+     for(auto dx=xa,dy=ya;dx<xb && dy<yb;++dx,++dy){
       DrawPixel(dx, dy, Color);
     }
   }
 }
+
 //xa,ya and xb,yb are the top point and bottom point, that are adjacent to the right angle
 template<typename coordType>
 void OutlineRightTriangle(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
@@ -196,14 +197,14 @@ void OutlineParallelogram(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b,
   Vec2<coordType> Vec_d {xa+xb,yb};
     DiagonalLine<coordType>(Vec_a, Vec_b, Color, "front");
     DiagonalLine<coordType>(Vec_c, Vec_d, Color, "front");
-    DiagonalLine<coordType>(Vec_b, Vec_a, Color, "back");
-    DiagonalLine<coordType>(Vec_d, Vec_c, Color, "back");
+    DiagonalLine<coordType>(Vec_a, Vec_b, Color, "back");
+    DiagonalLine<coordType>(Vec_c, Vec_d, Color, "back");
     for(auto dx=xa, dx_=xb;dx < xb;++dx,++dx_){
-      DrawPixel(dx, ya, Color);//Horiz top
+      DrawPixel(dx, ya, Color); //Horiz top
       DrawPixel(dx_, yb, Color);//Horiz bot
     }
-    for(auto dx=xb, dx_=xb+xa;dx > xb;--dx,--dx_){
-      DrawPixel(dx, yb, Color);//Horiz top
+    for(auto dx=xa, dx_=xb;dx < xb;++dx,++dx_){
+      DrawPixel(dx, yb, Color); //Horiz top
       DrawPixel(dx_, ya, Color);//Horiz bot
     }
 }
@@ -325,7 +326,7 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         ClearScreen(grey_lite);
         /*        Function Call        */
 
-        OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, cyan_lite);
+        OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, offwhite);
         //center point
         auto origin_x = static_cast<int>((ClientWidth/2)-22);
         auto origin_y = static_cast<int>((ClientHeight/2))+cell_size;
@@ -346,21 +347,21 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         //Now using NDC coordinates
         //Vec2int top_dc = {(BitmapWidth/4)-15, (BitmapHeight/6)+80};
         //Vec2int bot_dc = {(BitmapWidth/2)-30, (top_dc.getX() + top_dc.getY())};
-        Vec2int top { -10, -10 };
-        Vec2int bot { 10, 10 };
+        Vec2int top { -15, -15 };
+        Vec2int bot {  15,  15 };
         top.set_ndc(origin_x, origin_y, cell_size);
         bot.set_ndc(origin_x, origin_y, cell_size);
-        // FillSquare        (top, bot, bluegrey);        /*        ->   "|#|" */
-        // OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
-        // VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
-        // DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
-        // DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
-        // OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
-        // OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
-        // OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
-        // OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
+        //FillSquare        (top, bot, bluegrey);        /*        ->   "|#|" */
+        OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
+        VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
+        DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
+        DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
+        OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
+        OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
+        OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
+        OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
         OutlineParallelogram(top, bot, purp_lite);      /*        ->   "\\"  */
-        // OutlineEquilTriangle(top, bot, purp_lite, false);       /*        ->   "/\"  */
+        OutlineEquilTriangle(top, bot, purp_lite, false);       /*        ->   "/\"  */
         StretchDIBits(DeviceContext,0, 0,BitmapWidth, BitmapHeight,0, 0,ClientWidth, ClientHeight,
                       BitmapMemory, &BitmapInfo,DIB_RGB_COLORS, SRCCOPY);
     }
