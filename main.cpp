@@ -115,14 +115,14 @@ void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, std:
 }
 
 void HLine(int& X, int& Y, u32& Color) {
-  for(auto x=1;x<static_cast<int>(X/2)+465;++x){
+  for(auto x=1;x<static_cast<int>(X/2);++x){
     DrawPixel(X+x, Y, Color);
     DrawPixel(X-x, Y, Color);
   }
 }
 
 void VLine(int X, int Y, u32& Color){
-  for(auto y=1;y<static_cast<int>(Y/2)+270;++y){
+  for(auto y=1;y<static_cast<int>(Y/2);++y){
     DrawPixel(X, Y+y, Color);
     DrawPixel(X, Y-y, Color);
   }
@@ -279,8 +279,8 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     // Get client area dimensions
     RECT ClientRect;
     GetClientRect(Window, &ClientRect);
-    ClientWidth = (ClientRect.right*2) + (ClientRect.left*2)-850;
-    ClientHeight = (ClientRect.bottom*2) + (ClientRect.top*2)-330;
+    ClientWidth = (ClientRect.right*2) + (ClientRect.left*2);
+    ClientHeight = (ClientRect.bottom*2) + (ClientRect.top*2);
 
     BitmapWidth = ClientWidth;
     BitmapHeight = ClientHeight;
@@ -305,16 +305,16 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
     bool Running = true;
 
     //Grid Setup/Colors
-    int cell_size = 15;
+    int cell_size = 20;
     int col_row_cell_n = 5;
     //padding offset for grid, in px
     auto grid_pad_left = 1, grid_pad_top = 1;
     typedef Vec2<int> Vec2int;//using integers for coordinates
     Vec2int grid_top{grid_pad_left, grid_pad_top};
-    Vec2int grid_bot{ClientWidth, ClientHeight};//w, h
-    // Vec2int grid_top{0,1};
-    // Vec2int grid_bot{1920,1088};
+    Vec2int grid_bot{1950,1050};
 
+    //Vec2int grid_bot{ClientWidth/2, ClientHeight/2};//w, h
+    // Vec2int grid_top{0,1};
     while(Running) {
         MSG Message;
         while(PeekMessage(&Message, nullptr, 0, 0, PM_REMOVE)) {
@@ -323,45 +323,51 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
             DispatchMessage(&Message);
         }
         //Setup the grid/background/point of origin
-        ClearScreen(grey_lite);
+        ClearScreen(offwhite);
         /*        Function Call        */
+        OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, cyan_lite);
 
-        OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, offwhite);
-        //center point
-        auto origin_x = static_cast<int>((ClientWidth/2)-22);
-        auto origin_y = static_cast<int>((ClientHeight/2))+cell_size;
-        //draw another two lines of both x and y axes
-        HLine(origin_x, origin_y, green);
-        VLine(origin_x, origin_y, green);
-        //draw a dot for the center
-        // DrawPixel((ClientWidth/2)+1, (ClientHeight/2)+cell_size-5,purple);
+        //For accurate cartesian coordinate view, the axis origin points can be offset for even columns
+        auto origin_axis = [&](int&& axis_len){
+          auto ax_len_offset = axis_len % (cell_size*col_row_cell_n);
+          auto cols_ = static_cast<int>((axis_len-ax_len_offset)/(cell_size*col_row_cell_n));
+          auto ret_ = (cell_size*col_row_cell_n)*static_cast<int>(cols_/2);
+          return ret_;
+        };
+        auto org_x = origin_axis(grid_bot.getX()-grid_top.getX());
+        auto org_y = origin_axis(grid_bot.getY()-grid_top.getY());
+        HLine(org_x, org_y, green);//x-axis
+        VLine(org_x, org_y, green);//y-axis
 
+        //TESTING PURPOSE
+        //-------------------------------
         //Vec2int test = {0, 0};
         //test.set_ndc(origin_x, origin_y, cell_size);
         //assert the ndc x and y (0,0) is at the now device coordinate's origin
         //assert(test.getX() == origin_x);
         //assert(test.getY() == origin_y);
+        //-------------------------------
 
         //Sample of functions
         //top = xa,ya and bot = ya,yb // these coordinates are top left and bottom right
         //Now using NDC coordinates
         //Vec2int top_dc = {(BitmapWidth/4)-15, (BitmapHeight/6)+80};
         //Vec2int bot_dc = {(BitmapWidth/2)-30, (top_dc.getX() + top_dc.getY())};
-        Vec2int top { -15, -15 };
-        Vec2int bot {  15,  15 };
-        top.set_ndc(origin_x, origin_y, cell_size);
-        bot.set_ndc(origin_x, origin_y, cell_size);
+        Vec2int top { -20, -20 };
+        Vec2int bot {  10,  10 };
+        //top.set_ndc(origin_x, origin_y, cell_size);
+        //bot.set_ndc(origin_x, origin_y, cell_size);
         //FillSquare        (top, bot, bluegrey);        /*        ->   "|#|" */
-        OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
-        VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
-        DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
-        DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
-        OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
-        OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
-        OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
-        OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
-        OutlineParallelogram(top, bot, purp_lite);      /*        ->   "\\"  */
-        OutlineEquilTriangle(top, bot, purp_lite, false);       /*        ->   "/\"  */
+        // OutlineSquare     (top, bot, purp_lite);                /*        ->   "|_|" */
+        // VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
+        // DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
+        // DiagonalLine      (top, bot, purp_lite, "back");        /*        ->    "/"  */
+        // OutlineRightTriangle(top, bot, purp_lite, false, false);/*default ->   "|\"  */
+        // OutlineRightTriangle(top, bot, purp_lite, true, false); /*        ->   "|/"  */
+        // OutlineRightTriangle(top, bot, purp_lite, false, true); /*        ->   "/|"  */
+        // OutlineRightTriangle(top, bot, purp_lite, true, true);  /*        ->   "\|"  */
+        // OutlineParallelogram(top, bot, purp_lite);      /*        ->   "\\"  */
+        // OutlineEquilTriangle(top, bot, purp_lite, false);       /*        ->   "/\"  */
         StretchDIBits(DeviceContext,0, 0,BitmapWidth, BitmapHeight,0, 0,ClientWidth, ClientHeight,
                       BitmapMemory, &BitmapInfo,DIB_RGB_COLORS, SRCCOPY);
     }
