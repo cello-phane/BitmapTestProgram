@@ -114,17 +114,17 @@ void FillSquare(Vec2<coordType>& Vec_a, Vec2<coordType>& Vec_b, u32& Color, std:
   }
 }
 
-void HLine(int& X, int& Y, u32& Color) {
-  for(auto x=1;x<static_cast<int>(X/2);++x){
-    DrawPixel(X+x, Y, Color);
-    DrawPixel(X-x, Y, Color);
+void HLine_expand(int& xa, int& ya, int& radius, u32& Color) {
+  for(auto x=1;x<radius;++x){
+    DrawPixel(xa+x, ya, Color);
+    DrawPixel(xa-x, ya, Color);
   }
 }
 
-void VLine(int X, int Y, u32& Color){
-  for(auto y=1;y<static_cast<int>(Y/2);++y){
-    DrawPixel(X, Y+y, Color);
-    DrawPixel(X, Y-y, Color);
+void VLine_expand(int xa, int ya, int& radius, u32& Color){
+  for(auto y=1;y<radius;++y){
+    DrawPixel(xa, ya+y, Color);
+    DrawPixel(xa, ya-y, Color);
   }
 }
 
@@ -334,10 +334,14 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
           auto ret_ = (cell_size*col_row_cell_n)*static_cast<int>(cols_/2);
           return ret_;
         };
+        //Drawing the axis lines without an offset
+        //Maybe we can just cut off the offset or change the clients window resolution?
         auto org_x = origin_axis(grid_bot.getX()-grid_top.getX());
         auto org_y = origin_axis(grid_bot.getY()-grid_top.getY());
-        HLine(org_x, org_y, green);//x-axis
-        VLine(org_x, org_y, green);//y-axis
+        auto x_radius = static_cast<int>(org_x);//-(cell_size*col_row_cell_n));
+        auto y_radius = static_cast<int>(org_y);//-(cell_size*col_row_cell_n));
+        HLine_expand(org_x, org_y, x_radius, green);//x-axis
+        VLine_expand(org_x, org_y, y_radius, green);//y-axis
 
         //TESTING PURPOSE
         //-------------------------------
