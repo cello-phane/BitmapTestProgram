@@ -1,16 +1,21 @@
 #define WIN32_LEAN_AND_MEAN
 #define UNICODE
+#define NOMINMAX//lefticus's lambda_coroutines needs this for the num limits check
+
 #include <windows.h>
 // #include <cstdlib>
 // #include <wingdi.h>//Don't include this directly, since windows.h implicitly includes that header
 // #include <stdint.h>
 #include <string>
+#include <algorithm>
+#include <vector>
+#include "lambda_coroutines.hpp"
 // #include <cassert>
 // #include <vector>
 // #include <tuple>
 // #define TAU M_PI*2;//6.283185307179586
 typedef uint32_t u32;
-
+typedef unsigned long long int ullong;
 void* BitmapMemory;
 
 int BitmapWidth;
@@ -74,16 +79,16 @@ private:
 
 
 //Grid Setup
-float cell_size = 40;//sets pixel count of each cell(grid unit)
+float cell_size = 10;//sets pixel count of each cell(grid unit)
 float col_row_cell_n = 4;//sets the number of cells inside each col/row
-float cell_unit_interval = 0.5;
+float cell_unit_interval = 1;
 //padding offset for grid rectangle corners(in pixels)
 //offsets are needed or else bitmap program crashes
 float grid_pad_left = 1.0, grid_pad_top = 1.0;
 using PointInt = Point<int>;//using integers for coordinates
 using PointFloat = Point<float>;//using integers for coordinates
 PointFloat grid_top{grid_pad_left, grid_pad_top};
-PointFloat grid_bot{static_cast<float>(1920), static_cast<float>(1080)};//make a 1080 resolution grid
+PointFloat grid_bot{static_cast<float>(1980), static_cast<float>(1140)};//make a 1080 resolution grid
 
 //For accurate cartesian coordinate view, the axis origin points can be offset for even columns
 template<typename T>
@@ -141,8 +146,8 @@ void OutlineSquare(Point<coordType>& Point_a, Point<coordType>& Point_b, u32& Co
     pt.set_ndc(org_x,org_y,cell_size);
     FillDot(pb, 1, Color, Color_shade);
     FillDot(pt, 1, Color, Color_shade);
-    //DrawPixel(x, yb, Color); //Horiz bottom
-    //DrawPixel(x, ya, Color); //Horiz top
+    // DrawPixel(x, yb, Color); //Horiz bottom
+    // DrawPixel(x, ya, Color); //Horiz top
   }//Points should make parallel lines
   for(auto y=ya;y <= yb;y=y+0.001){
     Point<coordType> pl {xb, y};
@@ -151,8 +156,8 @@ void OutlineSquare(Point<coordType>& Point_a, Point<coordType>& Point_b, u32& Co
     pr.set_ndc(org_x,org_y,cell_size);
     FillDot(pl, 1, Color, Color_shade);
     FillDot(pr, 1, Color, Color_shade);
-    //DrawPixel(xb, y, Color); //Vert left
-    //DrawPixel(xa, y, Color); //Vert right
+    // DrawPixel(xb, y, Color); //Vert left
+    // DrawPixel(xa, y, Color); //Vert right
   }
 }
 
@@ -337,6 +342,11 @@ void OutlineGrid(Point<coordType>& Point_a, Point<coordType>& Point_b,  coordTyp
   }
 }
 
+template<typename C, typename T>
+bool inArray(C&& container, T item) {
+  return std::find(std::begin(container), std::end(container), item) != std::end(container);
+};
+
 LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam) {
     switch(Message) {
         case WM_KEYDOWN: {
@@ -403,6 +413,30 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
             DispatchMessage(&Message);
         }
 
+        // generates the set of all fibonacci numbers representable by a ull, returns
+        // empty optional at end of list
+        auto fib2 = [state = 0, fib_2 = 0ULL, fib_1 = 1ULL]() mutable -> std::optional<ullong> {
+          lambda_co_begin(state);
+
+          lambda_co_yield(0);
+          lambda_co_yield(1);
+
+          while (fib_1 < std::numeric_limits<decltype(fib_1)>::max() / 2) {
+            fib_2 = std::exchange(fib_1, fib_2 + fib_1);
+            lambda_co_yield(fib_1);
+          }
+
+          lambda_co_return({});
+        };
+        auto limit = 20;
+        auto count_fib = 0;
+        std::vector<ullong> fib_number_list;
+        for (const auto value : lambda_coroutines::while_has_value(fib2)) {
+          count_fib++;
+          fib_number_list.push_back(static_cast<int>(value));
+          if (count_fib >= limit) break;
+        }
+
         //Setup the grid/background/point of origin
         ClearScreen(0xFFFFFF);
         OutlineGrid(grid_top, grid_bot, cell_size, col_row_cell_n, grey_lite);
@@ -429,16 +463,23 @@ int WINAPI wWinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PWSTR CmdLine, i
         // PointInt top_dc = {(BitmapWidth/4)-15, (BitmapHeight/6)+80};
         // PointInt bot_dc = {(BitmapWidth/2)-30, (top_dc.getX() + top_dc.getY())};
         //Use cartesian coordinates, `normalized` DC:
-        PointFloat top { -5, -5 };
-        PointFloat bot {  5,  5 };
-        float radius = 5.0;
-        OutlineCircle(radius, purp_lite, purp_shade);
+        PointFloat top { -6, -6 };
+        PointFloat bot {  6,  6 };
+        for(float s=5;s<=50;++s){
+          top.setX(-s);
+          top.setY(-s);
+          bot.setX(s);
+          bot.setY(s);
+          if(inArray(fib_number_list, s) == false){
+            OutlineSquare(top, bot, blue_lite, blue_lite);/*        ->   "|_|" */
+            OutlineCircle(s, purp_lite, purp_shade);
+          }
+        }
         // top.set_ndc(org_x, org_y, cell_size);
         // bot.set_ndc(org_x, org_y, cell_size);
-        PointFloat center { 0, 0 };
-        center.set_ndc(org_x, org_y, cell_size);
-        FillDot(center, 1, purp_lite, purp_shade);                 /*        ->   "*"   */
-        OutlineSquare     (top, bot, purp_lite, purp_shade);       /*        ->   "|_|" */
+        // PointFloat center { 0, 0 };
+        // center.set_ndc(org_x, org_y, cell_size);
+        // FillDot(center, 1, grey, grey_lite);                 /*        ->   "*"   */
         // FillSquare        (top, bot, green_lite);               /*        ->   "|#|" */
         // VertexPointSquare (top, bot, purp_lite);                /*        ->   ": :" */
         // DiagonalLine      (top, bot, purp_lite, "front");       /*        ->    "\"  */
